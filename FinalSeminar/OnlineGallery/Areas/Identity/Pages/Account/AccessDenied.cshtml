@@ -1,0 +1,20 @@
+﻿@page
+@model AccessDeniedModel
+@{
+    ViewData["Title"] = "Access denied";
+    Layout = "~/Views/Shared/_ErrorLayout.cshtml";
+}
+
+<!--============= Error Section Starts Here =============-->
+<div class="error-section padding-top padding-bottom bg_img" data-background="@Url.Content("~/assets/images/error-bg.png")">
+    <div class="container">
+        <div class="error-wrapper">
+            <div class="error-thumb">
+                <img src="~/assets/images/error.png" alt="error">
+            </div>
+            <p><h4 class="text-danger">This page does not exists or you do not have access to this resource.</h4></p>
+            <h4 class="title">Return to the <a href="~/Home">homepage</a></h4>
+        </div>
+    </div>
+</div>
+<!--============= Error Section Ends Here =============-->

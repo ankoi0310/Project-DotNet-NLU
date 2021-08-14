@@ -1,0 +1,76 @@
+﻿@model OnlineGallery.Models.Product
+
+@{
+    Layout = null;
+}
+
+<div class="row">
+    <div class="col-md-12">
+        <ul class="font-weight-bolder" style="list-style: none;">
+            <li><span asp-validation-for="Name" class="text-danger"></span></li>
+            <li><span asp-validation-for="Status" class="text-danger"></span></li>
+            <li><span asp-validation-for="Transmission" class="text-danger"></span></li>
+            <li><span asp-validation-for="FileImage" class="text-danger"></span></li>
+            <li><span asp-validation-for="Year" class="text-danger"></span></li>
+            <li><span asp-validation-for="Condition" class="text-danger"></span></li>
+            <li><span asp-validation-for="DefaultPrice" class="text-danger"></span></li>
+            <li><span asp-validation-for="Color" class="text-danger"></span></li>
+            <li><span asp-validation-for="Fuel" class="text-danger"></span></li>
+            <li><span asp-validation-for="Engine" class="text-danger"></span></li>
+            <li><span asp-validation-for="Mileage" class="text-danger"></span></li>
+            <li><span asp-validation-for="Doors" class="text-danger"></span></li>
+        </ul>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <form asp-action="CreateOrUpdate" enctype="multipart/form-data" asp-route-id="@Model.Id" onsubmit="return jQueryAjaxPost(this);" autocomplete="off">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="Id" value="@Model.Id" />
+            <input type="hidden" asp-for="Name" value="@Model.Name" />
+            <input type="hidden" asp-for="DefaultPrice" value="@Model.DefaultPrice" />
+            <input type="hidden" asp-for="Condition" value="@Model.Condition" />
+            <input type="hidden" asp-for="Year" value="@Model.Year" />
+            <input type="hidden" asp-for="Fuel" value="@Model.Fuel" />
+            <input type="hidden" asp-for="Color" value="@Model.Color" />
+            <input type="hidden" asp-for="Mileage" value="@Model.Mileage" />
+            <input type="hidden" asp-for="Engine" value="@Model.Engine" />
+            <input type="hidden" asp-for="Transmission" value="@Model.Transmission" />
+            <input type="hidden" asp-for="Doors" value="@Model.Doors" />
+            <input type="hidden" asp-for="Description" value="@Model.Description" />
+            <input type="hidden" asp-for="Status" value="@Model.Status" />
+            <div class="row">
+                <div class="col-12">
+                    <div class="form-group">
+                        <label asp-for="Image" class="control-label"></label>
+                        <input asp-for="FileImage" class="form-control" accept="image/*" />
+                    </div>
+                </div>
+            </div>
+            <div class="row mt-3">
+                <div class="col-12">
+                    <div class="form-group">
+                        <input type="submit" value="Submit" class="btn btn-primary btn-block" />
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    DecoupledEditor
+        .create(document.querySelector('#editor'))
+        .then(editor => {
+            const toolbarContainer = document.querySelector('#toolbar-container');
+
+            toolbarContainer.appendChild(editor.ui.view.toolbar.element);
+        })
+        .catch(error => {
+            console.error(error);
+        });
+</script>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

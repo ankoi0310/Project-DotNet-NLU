@@ -1,0 +1,115 @@
+﻿@page
+@*@model RegisterModel*@
+
+<!--============= Hero Section Starts Here =============-->
+<div class="hero-section">
+    <div class="container">
+        <ul class="breadcrumb">
+            <li>
+                <a href="index.html">Home</a>
+            </li>
+            <li>
+                <span>Register</span>
+            </li>
+        </ul>
+    </div>
+    <div class="bg_img hero-bg bottom_center" data-background="@Url.Content("~/assets/images/banner/hero-bg.png")"></div>
+</div>
+<!--============= Hero Section Ends Here =============-->
+<!--============= Account Section Starts Here =============-->
+<!--<section class="account-section padding-bottom">
+    <div class="container">
+        <div class="account-wrapper mt--100 mt-lg--440">
+            <div class="left-side">
+                <div class="section-header">
+                    <h2 class="title">REGISTER</h2>
+                    <p>We're happy you're here!</p>
+                </div>
+                <ul class="login-with">
+                    <li>
+                        <a href="#0"><i class="fab fa-facebook"></i>Log in with Facebook</a>
+                    </li>
+                    <li>
+                        <a href="#0"><i class="fab fa-google-plus"></i>Log in with Google</a>
+                    </li>
+                </ul>
+                <div class="or">
+                    <span>Or</span>
+                </div>
+                <form class="login-form" asp-route-returnUrl="@@Model.ReturnUrl" method="post">
+                    <div asp-validation-summary="All" class="text-danger"></div>
+                    <div class="form-group mb-30">
+                        <label asp-for="Input.FullName"><i class="far fa-envelope"></i></label>
+                        <input type="text" asp-for="Input.FullName" placeholder="Your Fullname">
+                        <span asp-validation-for="Input.FullName" class="text-danger"></span>
+                    </div>
+                    <div class="form-group mb-30">
+                        <label asp-for="Input.Email"><i class="far fa-envelope"></i></label>
+                        <input type="text" asp-for="Input.Email" placeholder="Email Address">
+                        <span asp-validation-for="Input.Email" class="text-danger"></span>
+                    </div>
+                    <div class="form-group mb-30">
+                        <label asp-for="Input.Password"><i class="fas fa-lock"></i></label>
+                        <input type="password" asp-for="Input.Password" placeholder="Password">
+                        <span asp-validation-for="Input.Password" class="text-danger"></span>-->
+                        @*<span class="pass-type"><i class="fas fa-eye"></i></span>*@
+                    <!--</div>
+                    <div class="form-group mb-30">
+                        <label asp-for="Input.ConfirmPassword"><i class="fas fa-lock"></i></label>
+                        <input type="password" asp-for="Input.ConfirmPassword" placeholder="Confirm password">
+                        <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>-->
+                        @*<span class="pass-type"><i class="fas fa-eye"></i></span>*@
+                    <!--</div>
+                    <div class="form-group checkgroup mb-30">
+                        <input type="checkbox" name="terms" id="check"><label for="check">The Sbidu Terms of Use apply</label>
+                    </div>
+                    <div class="form-group mb-0">
+                        <button type="submit" class="custom-button">REGISTER</button>
+                    </div>
+                </form>
+            </div>
+            <div class="right-side cl-white">
+                <div class="section-header mb-0">
+                    <h3 class="title mt-0">ALREADY HAVE AN ACCOUNT?</h3>
+                    <p>Log in and go to your Dashboard.</p>
+                    <a href="~/Identity/Account/Login" class="custom-button transparent">Login</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>-->
+<!--============= Account Section Ends Here =============-->
+@*<div class="col-md-6 col-md-offset-2">
+    <section>
+        <h4>Use another service to register.</h4>
+        <hr />
+        @{
+            if ((Model.ExternalLogins?.Count ?? 0) == 0)
+            {
+                <div>
+                    <p>
+                        There are no external authentication services configured. See <a href="https://go.microsoft.com/fwlink/?LinkID=532715">this article</a>
+                        for details on setting up this ASP.NET application to support logging in via external services.
+                    </p>
+                </div>
+            }
+            else
+            {
+                <form id="external-account" asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="form-horizontal">
+                    <div>
+                        <p>
+                            @foreach (var provider in Model.ExternalLogins)
+                            {
+                                <button type="submit" class="btn btn-primary" name="provider" value="@provider.Name" title="Log in using your @provider.DisplayName account">@provider.DisplayName</button>
+                            }
+                        </p>
+                    </div>
+                </form>
+            }
+        }
+    </section>
+</div>*@
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

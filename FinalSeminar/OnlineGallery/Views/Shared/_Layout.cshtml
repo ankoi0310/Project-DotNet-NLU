@@ -1,0 +1,36 @@
+﻿<!DOCTYPE html>
+
+<html>
+@await Html.PartialAsync("~/Views/PartialView/Head.cshtml")
+<body>
+    <!--============= ScrollToTop Section Starts Here =============-->
+    @await Html.PartialAsync("~/Views/PartialView/ScrollToTop.cshtml")
+    <!--============= ScrollToTop Section Ends Here =============-->
+    <!--============= Header Section Starts Here =============-->
+    @await Html.PartialAsync("~/Views/PartialView/Header.cshtml")
+    <!--============= Header Section Ends Here =============-->
+    <!--============= Cart Section Starts Here =============-->
+    @await Html.PartialAsync("~/Views/PartialView/Cart.cshtml")
+    <!--============= Cart Section Ends Here =============-->
+    @RenderBody()
+    <div class="modal" tabindex="-1" id="form-modal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--============= Footer Section Starts Here =============-->
+    @await Html.PartialAsync("~/Views/PartialView/Footer.cshtml")
+    <!--============= Footer Section Ends Here =============-->
+    <!--============= Scripts Section Starts Here =============-->
+    @await Html.PartialAsync("~/Views/PartialView/Scripts.cshtml")
+    @await RenderSectionAsync("Scripts", required: false)
+    <!--============= Scripts Section Ends Here =============-->
+</body>
+</html>

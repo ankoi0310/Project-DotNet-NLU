@@ -1,0 +1,44 @@
+﻿<!DOCTYPE html>
+
+<html>
+@await Html.PartialAsync("~/Views/PartialView/Admin/Head.cshtml")
+<body class="hold-transition sidebar-mini">
+    <div class="wrapper">
+        <!-- Navbar -->
+        @await Html.PartialAsync("~/Views/PartialView/Admin/Navbar.cshtml")
+        <!-- /.navbar -->
+        <!-- Main Sidebar Container -->
+        @await Html.PartialAsync("~/Views/PartialView/Admin/Sidebar.cshtml")
+        <!-- Content Wrapper. Contains page content -->
+        <div class="content-wrapper">
+            <!-- Content Header (Page header) -->
+            @await Html.PartialAsync("~/Views/PartialView/Admin/Header.cshtml")
+            <!-- /.content-header -->
+            <!-- Main content -->
+            @RenderBody()
+            <div class="modal" tabindex="-1" id="form-modal">
+                <div class="modal-dialog" style="max-width: 800px;">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title"></h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- /.content -->
+        </div>
+        <!-- /.content-wrapper -->
+        <!-- Control Sidebar -->
+        <aside class="control-sidebar control-sidebar-dark">
+            <!-- Control sidebar content goes here -->
+        </aside>
+        <!-- /.control-sidebar -->
+        <!-- Main Footer -->
+        @await Html.PartialAsync("~/Views/PartialView/Admin/Footer.cshtml")
+    </div>
+    @await Html.PartialAsync("~/Views/PartialView/Admin/Scripts.cshtml")
+</body>
+</html>

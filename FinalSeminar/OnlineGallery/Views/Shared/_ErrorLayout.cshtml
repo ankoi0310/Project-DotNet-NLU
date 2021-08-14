@@ -1,0 +1,17 @@
+﻿<!DOCTYPE html>
+
+<html>
+@await Html.PartialAsync("~/Views/PartialView/Head.cshtml")
+<body>
+    <div class="overlayer" id="overlayer">
+        <div class="loader">
+            <div class="loader-inner"></div>
+        </div>
+    </div>
+    @RenderBody()
+    <!--============= Scripts Section Starts Here =============-->
+    @await Html.PartialAsync("~/Views/PartialView/Scripts.cshtml")
+    @await RenderSectionAsync("Scripts", required: false)
+    <!--============= Scripts Section Ends Here =============-->
+</body>
+</html>

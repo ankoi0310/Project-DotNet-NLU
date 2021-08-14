@@ -1,0 +1,147 @@
+﻿@model IEnumerable<OnlineGallery.Models.Product>
+
+@{
+    ViewData["Title"] = "Product";
+
+    var featuredList = Model.OrderByDescending(key => key.Id).Take(3).OrderBy(key => key.Id);
+}
+
+<!--============= Hero Section Starts Here =============-->
+<div class="hero-section style-2">
+    <div class="container">
+        <ul class="breadcrumb">
+            <li>
+                <a href="~/Home">Home</a>
+            </li>
+            <li>
+                <span>Product</span>
+            </li>
+        </ul>
+    </div>
+    <div class="bg_img hero-bg bottom_center" data-background="@Url.Content("~/assets/images/banner/hero-bg.png")"></div>
+</div>
+<!--============= Hero Section Ends Here =============-->
+<!--============= Featured Auction Section Starts Here =============-->
+<section class="featured-auction-section padding-bottom mt--240 mt-lg--440 pos-rel">
+    <div class="container">
+        <div class="section-header cl-white mw-100 left-style">
+            <h3 class="title">New Featured Products!</h3>
+        </div>
+        <div class="row justify-content-center mb-30-none">
+            @foreach (var item in featuredList)
+            {
+                <div class="col-sm-10 col-md-6 col-lg-4">
+                    <div class="auction-item-2">
+                        <div class="auction-thumb">
+                            <a href="~/Home/ProductDetail/@item.Id"><img src="~/images/@item.Image" alt="car"></a>
+                            <a href="#0" class="rating"><i class="far fa-star"></i></a>
+                        </div>
+                        <div class="auction-content">
+                            <h6 class="title">
+                                <a href="#0" class="font-weight-bolder" title="@item.Name">
+                                    @if (item.Name.Length > 28)
+                                    {
+                                        @item.Name.Substring(0, 28) <span>...</span>
+                                    }
+                                    else
+                                    {
+                                        @item.Name
+                                    }
+                                </a>
+                                <span>Price: <strong>@item.DefaultPrice.Value.ToString("C")</strong></span>
+                            </h6>
+                            <div class="text-center">
+                                <a href="#0" class="btn btn-outline-primary mr-1">Add To Cart</a>
+                                <a href="#0" class="btn btn-outline-success ml-1">Buy Now</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</section>
+<!--============= Featured Auction Section Ends Here =============-->
+<!--============= Product Auction Section Starts Here =============-->
+<div class="product-auction padding-bottom">
+    <div class="container">
+        <div class="product-header mb-40">
+            <div class="product-header-item">
+                <div class="item">Sort By : </div>
+                <select name="sort-by" class="select-bar">
+                    <option value="all">All</option>
+                    <option value="name">Name</option>
+                    <option value="date">Date</option>
+                    <option value="type">Type</option>
+                    <option value="car">Car</option>
+                </select>
+            </div>
+            <div class="product-header-item">
+                <div class="item">Show : </div>
+                <select name="sort-by" class="select-bar">
+                    <option value="">All</option>
+                    <option value="6">06</option>
+                    <option value="12">12</option>
+                    <option value="18">18</option>
+                    <option value="24">24</option>
+                    <option value="30">30</option>
+                </select>
+            </div>
+            <form class="product-search ml-auto">
+                <input type="text" placeholder="Item Name">
+                <button type="submit"><i class="fas fa-search"></i></button>
+            </form>
+        </div>
+        <div class="row mb-30-none justify-content-center">
+            @foreach (var item in Model)
+            {
+                <div class="col-sm-10 col-md-6 col-lg-4">
+                    <div class="auction-item-2">
+                        <div class="auction-thumb">
+                            <a href="~/Home/ProductDetail/@item.Id"><img src="~/images/@item.Image" alt="product"></a>
+                            <a href="#0" class="rating"><i class="far fa-star"></i></a>
+                            <a href="#0" class="bid"><i class="flaticon-auction"></i></a>
+                        </div>
+                        <div class="auction-content">
+                            <h6 class="title">
+                                <a href="#0" class="font-weight-bolder" title="@item.Name">
+                                    @if (item.Name.Length > 28)
+                                    {
+                                        @item.Name.Substring(0, 28) <span>...</span>
+                                    }
+                                    else
+                                    {
+                                        @item.Name
+                                    }
+                                </a>
+                                <span>Price: <strong>@item.DefaultPrice.Value.ToString("C")</strong></span>
+                            </h6>
+                            <div class="text-center">
+                                <a href="#0" class="btn btn-outline-primary mr-1">Add To Cart</a>
+                                <a href="#0" class="btn btn-outline-success ml-1">Buy Now</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+        <ul class="pagination">
+            <li>
+                <a href="#0"><i class="flaticon-left-arrow"></i></a>
+            </li>
+            <li>
+                <a href="#0">1</a>
+            </li>
+            <li>
+                <a href="#0" class="active">2</a>
+            </li>
+            <li>
+                <a href="#0">3</a>
+            </li>
+            <li>
+                <a href="#0"><i class="flaticon-right-arrow"></i></a>
+            </li>
+        </ul>
+    </div>
+</div>
+<!--============= Product Auction Section Ends Here =============-->

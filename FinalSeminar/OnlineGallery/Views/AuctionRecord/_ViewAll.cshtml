@@ -1,0 +1,91 @@
+﻿@model IEnumerable<OnlineGallery.Models.Product>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <table id="product" class="table table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th class="align-middle text-center">
+                                @Html.DisplayNameFor(item => item.Name)
+                            </th>
+                            <th class="align-middle text-center">
+                                @Html.DisplayNameFor(item => item.Image)
+                            </th>
+                            <th class="align-middle text-center">
+                                Appearance
+                            </th>
+                            <th class="align-middle text-center">
+                                @Html.DisplayNameFor(item => item.Description)
+                            </th>
+                            <th class="align-middle text-center">
+                                @Html.DisplayNameFor(item => item.DefaultPrice)
+                            </th>
+                            <th class="align-middle text-center">
+                                @Html.DisplayNameFor(item => item.Status)
+                            </th>
+                            <th>
+                                <a onclick="showInPopup('@Url.Action("CreateOrUpdate", "Product", null, Context.Request.Scheme)', 'New Product')" class="btn btn-success btn-block"><i class="fas fa-plus"></i></a>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>
+                                    @item.Name
+                                </td>
+                                <td>
+                                    <img src="~/images/@item.Image" width="200" height="100" />
+                                </td>
+                                <td>
+                                    <ul><li><strong>Id:</strong> @item.Id</li>
+                                        <li><strong>Condition:</strong> @item.Condition</li>
+                                        <li><strong>Year:</strong> @item.Year</li>
+                                        <li><strong>Fuel:</strong> @item.Fuel</li>
+                                        <li><strong>Color:</strong> @item.Color</li>
+                                        <li><strong>Mileage:</strong> @item.Mileage</li>
+                                        <li><strong>Engine:</strong> @item.Engine</li>
+                                        <li><strong>Transmission:</strong> @item.Transmission</li>
+                                        <li><strong>Doors:</strong> @item.Doors</li>
+                                    </ul>
+                                </td>
+                                <td class="h-25">
+                                    @item.Description
+                                </td>
+                                <td>
+                                    @item.DefaultPrice
+                                </td>
+                                <td>
+                                    @item.Status
+                                </td>
+                                <td>
+                                    <a onclick="showInPopup('@Url.Action("CreateOrUpdate", "Product", new { item.Id }, Context.Request.Scheme)', 'Update Product')" class="btn btn-info">@*<i class="fas fa-pencil-alt"></i>*@ Edit</a>
+                                    <form asp-action="Sold" asp-route-id="@item.Id" onsubmit="return jQueryAjaxSoldConfirm(this);" class="d-inline">
+                                        <input type="submit" value="Sold" class="btn btn-warning" />
+                                    </form>
+                                    @*@if (Tools.CheckAuctionExist(item.Id))
+                                        {
+                                            <a href="/Auction/List" class="btn btn-dark"><i class="fas fa-angle-double-right"></i></a>
+                                        }
+                                        else
+                                        {
+                                            <a onclick="showInPopup('@Url.Action("AddorEdit", "Auction", new { ProductId = item.Id }, Context.Request.Scheme)', 'Add Auction')" class="btn btn-warning"><i class="fas fa-chevron-circle-right"></i></a>
+                                        }*@
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <!-- /.card-body -->
+        </div>
+        <!-- /.card -->
+    </div>
+</div>
+
+<script>
+
+</script>

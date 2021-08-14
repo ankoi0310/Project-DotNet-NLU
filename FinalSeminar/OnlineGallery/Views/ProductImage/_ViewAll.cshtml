@@ -1,0 +1,70 @@
+﻿@model IEnumerable<OnlineGallery.Models.ProductImage>
+
+@{
+    ViewBag.Count = 0;
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <table id="image" class="table table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th class="align-middle text-center">
+                                No.
+                            </th>
+                            <th class="align-middle text-center">
+                                @Html.DisplayNameFor(item => item.ProductId)
+                            </th>
+                            <th class="align-middle text-center">
+                                @Html.DisplayNameFor(item => item.Image)
+                            </th>
+                            <th class="align-middle text-center">
+                                Uploaded Image
+                            </th>
+                            <th>
+                                <a onclick="showInPopup('@Url.Action("CreateOrUpdate", "ProductImage", null, Context.Request.Scheme)', 'New Image')" class="btn btn-success btn-block"><i class="fas fa-plus"></i></a>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            ViewBag.Count++;
+                            <tr>
+                                <td>
+                                    @ViewBag.Count
+                                </td>
+                                <td>
+                                    @if (item.Product != null)
+                                    {
+                                        @item.Product.Name
+                                    }
+                                </td>
+                                <td>
+                                    @item.Image
+                                </td>
+                                <td>
+                                    <img src="@("~/images/" + item.Image)" class="product" asp-append-version="true" />
+                                </td>
+                                <td>
+                                    <a onclick="showInPopup('@Url.Action("CreateOrUpdate", "ProductImage", new { item.Id }, Context.Request.Scheme)', 'Update Image')" class="btn btn-info">@*<i class="fas fa-pencil-alt"></i>*@ Edit</a>
+                                    <form asp-action="Delete" asp-route-id="@item.Id" onsubmit="return jQueryAjaxDelete(this);" class="d-inline">
+                                        <input type="submit" value="Delete" class="btn btn-danger" />
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <!-- /.card-body -->
+        </div>
+        <!-- /.card -->
+    </div>
+</div>
+
+<script>
+
+</script>

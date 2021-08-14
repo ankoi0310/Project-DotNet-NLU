@@ -1,0 +1,202 @@
+﻿@using OnlineGallery.Data
+
+@inject ApplicationDbContext context
+
+@model OnlineGallery.Models.Product
+
+@{
+    ViewData["Title"] = "Product Detail";
+
+    var imageList = Tools.GetProductImages(context, Model.Id);
+}
+
+<!--============= Hero Section Starts Here =============-->
+<div class="hero-section style-2">
+    <div class="container">
+        <ul class="breadcrumb">
+            <li>
+                <a href="~/Home">Home</a>
+            </li>
+            <li>
+                <a href="~/Home/Product">Product</a>
+            </li>
+            <li>
+                <span>Detail</span>
+            </li>
+        </ul>
+    </div>
+    <div class="bg_img hero-bg bottom_center" data-background="@Url.Content("~/assets/images/banner/hero-bg.png")"></div>
+</div>
+<!--============= Hero Section Ends Here =============-->
+<!--============= Product Details Section Starts Here =============-->
+<section class="product-details padding-bottom mt--240 mt-lg--440">
+    <div class="container">
+        <div class="product-details-slider-top-wrapper">
+            <div class="product-details-slider owl-theme owl-carousel" id="sync1">
+                @foreach (var image in imageList)
+                {
+                    <div class="slide-top-item">
+                        <div class="slide-inner">
+                            <img src="~/images/@image" alt="product">
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+        <div class="product-details-slider-wrapper">
+            <div class="product-bottom-slider owl-theme owl-carousel" id="sync2">
+                @foreach (var image in imageList)
+                {
+                    <div class="slide-bottom-item">
+                        <div class="slide-inner">
+                            <img src="~/images/@image" alt="product">
+                        </div>
+                    </div>
+                }
+            </div>
+            <span class="det-prev det-nav">
+                <i class="fas fa-angle-left"></i>
+            </span>
+            <span class="det-next det-nav active">
+                <i class="fas fa-angle-right"></i>
+            </span>
+        </div>
+        <div class="row mt-40-60-80">
+            <div class="col-lg-9">
+                <div class="product-details-content">
+                    <div class="product-details-header">
+                        <h3 class="title">@Model.Name</h3>
+                        <ul>
+                            <li>Listing ID: @Model.Id</li>
+                        </ul>
+                    </div>
+                    <div class="buy-now-area">
+                        <a href="#0" class="custom-button">Buy Now: @Model.DefaultPrice.Value.ToString("C")</a>
+                        <a href="#0" class="rating custom-button active border"><i class="fas fa-star"></i> Add to Favorites</a>
+                        <div class="share-area">
+                            <span>Share to:</span>
+                            <ul>
+                                <li>
+                                    <a href="#0"><i class="fab fa-facebook-f"></i></a>
+                                </li>
+                                <li>
+                                    <a href="#0"><i class="fab fa-twitter"></i></a>
+                                </li>
+                                <li>
+                                    <a href="#0"><i class="fab fa-linkedin-in"></i></a>
+                                </li>
+                                <li>
+                                    <a href="#0"><i class="fab fa-instagram"></i></a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @{
+                Auction auction = Tools.GetAuctionFromProduct(context, Model.Id);
+                if (auction != null)
+                {
+                    <div class="col-lg-3">
+                        <form action="~/Home/AuctionDetail/@auction.Id" method="post">
+                            <input type="submit" class="bg-success font-weight-bolder" value="The auction is on. Join now!" />
+                        </form>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+    <div class="product-tab-menu-area mb-40-60 mt-70-100">
+        <div class="container">
+            <ul class="product-tab-menu nav nav-tabs">
+                <li>
+                    <a href="#details" class="active" data-toggle="tab">
+                        <div class="thumb">
+                            <img src="~/assets/images/product/tab1.png" alt="product">
+                        </div>
+                        <div class="content">Description</div>
+                    </a>
+                </li>
+                <li>
+                    <a href="#delevery" data-toggle="tab">
+                        <div class="thumb">
+                            <img src="~/assets/images/product/tab2.png" alt="product">
+                        </div>
+                        <div class="content">Delivery Options</div>
+                    </a>
+                </li>
+                <li>
+                    <a href="#questions" data-toggle="tab">
+                        <div class="thumb">
+                            <img src="~/assets/images/product/tab4.png" alt="product">
+                        </div>
+                        <div class="content">Questions </div>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <div class="container">
+        <div class="tab-content">
+            <div class="tab-pane fade show active" id="details">
+                <div class="tab-details-content">
+                    <div class="header-area">
+                        <h3 class="title">@Model.Name</h3>
+                        <div class="item">
+                            <table class="product-info-table">
+                                <tbody>
+                                    <tr>
+                                        <th>Condition</th>
+                                        <td>@Model.Condition</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Mileage</th>
+                                        <td>@Model.Mileage.Value.ToString("#,###") miles</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Year</th>
+                                        <td>@Model.Year.Value</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Engine</th>
+                                        <td>@Model.Engine</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Fuel</th>
+                                        <td>@Model.Fuel</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Transmission</th>
+                                        <td>@Model.Transmission</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Color</th>
+                                        <td>@Model.Color</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Doors</th>
+                                        <td>@Model.Doors.Value</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <input asp-for="Description" type="hidden" />
+                        <div class="item" id="product-description">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @await Html.PartialAsync("~/Views/PartialView/DeliveryOptions.cshtml")
+            @await Html.PartialAsync("~/Views/PartialView/Questions.cshtml")
+        </div>
+    </div>
+</section>
+<!--============= Product Details Section Ends Here =============-->
+
+@if (Model.Description != null)
+{
+    <script>
+        let productDescription = document.getElementById('product-description');
+        productDescription.innerHTML = document.getElementById('Description').value;
+    </script>
+}

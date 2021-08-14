@@ -1,0 +1,86 @@
+﻿@model IEnumerable<OnlineGallery.Models.Auction>
+
+@{
+    ViewBag.Count = 0;
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <table id="product" class="table table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th class="align-middle text-center">
+                                No.
+                            </th>
+                            <th class="align-middle text-center">
+                                @Html.DisplayNameFor(item => item.Product.Name)
+                            </th>
+                            <th class="align-middle text-center">
+                                @Html.DisplayNameFor(item => item.StartDay)
+                            </th>
+                            <th class="align-middle text-center">
+                                @Html.DisplayNameFor(item => item.ClosingDay)
+                            </th>
+                            <th class="align-middle text-center">
+                                @Html.DisplayNameFor(item => item.StartingPrice)
+                            </th>
+                            <th class="align-middle text-center">
+                                @Html.DisplayNameFor(item => item.StepPrice)
+                            </th>
+                            <th class="align-middle text-center">
+                                @Html.DisplayNameFor(item => item.Status)
+                            </th>
+                            <th>
+                                <a onclick="showInPopup('@Url.Action("CreateOrUpdate", "Auction", null, Context.Request.Scheme)', 'New Auction')" class="btn btn-success btn-block"><i class="fas fa-plus"></i></a>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            ViewBag.Count++;
+                            <tr>
+                                <td>
+                                    @ViewBag.Count
+                                </td>
+                                <td>
+                                    @item.Product.Name
+                                </td>
+                                <td>
+                                    @item.StartDay
+                                </td>
+                                <td>
+                                    @item.ClosingDay
+                                </td>
+                                <td>
+                                    @item.StartingPrice
+                                </td>
+                                <td>
+                                    @item.StepPrice
+                                </td>
+                                <td>
+                                    @item.Status
+                                </td>
+                                <td>
+                                    <a onclick="showInPopup('@Url.Action("CreateOrUpdate", "Auction", new { item.Id }, Context.Request.Scheme)', 'Update Auction')" class="btn btn-info">@*<i class="fas fa-pencil-alt"></i>*@ Edit</a>
+                                    
+                                    <form asp-action="Delete" asp-route-id="@item.Id" onsubmit="return jQueryAjaxSoldConfirm(this);" class="d-inline">
+                                        <input type="submit" value="Delete" class="btn btn-warning" />
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <!-- /.card-body -->
+        </div>
+        <!-- /.card -->
+    </div>
+</div>
+
+<script>
+
+</script>

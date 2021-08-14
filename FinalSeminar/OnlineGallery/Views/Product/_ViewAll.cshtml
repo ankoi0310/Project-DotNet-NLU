@@ -1,0 +1,155 @@
+﻿@using OnlineGallery.Data
+
+@inject ApplicationDbContext context
+
+@model IEnumerable<OnlineGallery.Models.Product>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <table id="product" class="table table-bordered table-striped" style="table-layout: fixed;">
+                    <thead>
+                        <tr>
+                            <th class="align-middle text-center">
+                                @Html.DisplayNameFor(item => item.Name)
+                            </th>
+                            <th class="align-middle text-center">
+                                Appearance
+                            </th>
+                            <th class="align-middle text-center">
+                                @Html.DisplayNameFor(item => item.Description)
+                            </th>
+                            <th class="align-middle text-center">
+                                @Html.DisplayNameFor(item => item.DefaultPrice)
+                            </th>
+                            <th class="align-middle text-center">
+                                @Html.DisplayNameFor(item => item.Status)
+                            </th>
+                            <th>
+                                <a onclick="showInPopup('@Url.Action("CreateOrUpdate", "Product", null, Context.Request.Scheme)', 'New Product')" class="btn btn-success btn-block"><i class="fas fa-plus"></i></a>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            Auction auction = Tools.GetAuctionFromProduct(context, item.Id);
+                            if (item.Status)
+                            {
+                                if (auction != null)
+                                {
+                                    ViewBag.Status = "Currently being auctioned";
+                                }
+                                else
+                                {
+                                    ViewBag.Status = "On sale";
+                                }
+                            }
+                            else
+                            {
+                                if (Tools.CheckGalleryProduct(context, item.Id))
+                                {
+                                    ViewBag.Status = "Sold";
+                                }
+                                else
+                                {
+                                    ViewBag.Status = "Haven't updated gallery yet";
+                                }
+                            }
+
+                            <tr>
+                                <td>
+                                    @item.Name <br />
+                                    @if (item.Image != null)
+                                    {
+                                        <img src="~/images/@item.Image" width="300" height="200" />
+                                    }
+                                    else
+                                    {
+                                        <a onclick="showInPopup('@Url.Action("AddImage", "Product", new { item.Id }, Context.Request.Scheme)', 'Update Product')" class="text-danger font-weight-bolder" style="cursor: pointer;">Please update image for this product</a>
+                                    }
+                                </td>
+                                <td>
+                                    <ul>
+                                        <li><strong>Id:</strong> @item.Id</li>
+                                        <li><strong>Condition:</strong> @item.Condition</li>
+                                        <li><strong>Year:</strong> @item.Year</li>
+                                        <li><strong>Fuel:</strong> @item.Fuel</li>
+                                        <li><strong>Color:</strong> @item.Color</li>
+                                        <li><strong>Mileage:</strong> @item.Mileage</li>
+                                        <li><strong>Engine:</strong> @item.Engine</li>
+                                        <li><strong>Transmission:</strong> @item.Transmission</li>
+                                        <li><strong>Doors:</strong> @item.Doors</li>
+                                    </ul>
+                                </td>
+                                <td>
+                                    @if (item.Description != null)
+                                    {
+                                        if (item.Description.Length > 600)
+                                        {
+                                            var shortDescription = item.Description.Substring(0, 600);
+                                            <span class="full-description d-none">@item.Description</span>
+                                            <span class="short-description">@shortDescription...</span>
+                                            <input class="btnDescription font-weight-bolder bg-transparent border-0" type="button" value="Expand" />
+                                        }
+                                        else
+                                        {
+                                            <span>@item.Description</span>
+                                        }
+                                    }
+                                </td>
+                                <td>
+                                    @item.DefaultPrice
+                                </td>
+                                <td>
+                                    @ViewBag.Status
+                                </td>
+                                <td>
+                                    <a onclick="showInPopup('@Url.Action("CreateOrUpdate", "Product", new { item.Id }, Context.Request.Scheme)', 'Update Product')" class="btn btn-info">@*<i class="fas fa-pencil-alt"></i>*@ Edit</a>
+                                    @*<form asp-action="Sold" asp-route-id="@item.Id" onsubmit="return jQueryAjaxSoldConfirm(this);" class="d-inline">
+                                            <input type="submit" value="Sold" class="btn btn-danger" />
+                                        </form>*@
+                                    @if (!Tools.CheckGalleryProduct(context, item.Id))
+                                    {
+                                        <a onclick="showInPopup('@Url.Action("CreateOrUpdate", "ProductImage", null, Context.Request.Scheme)', 'New Gallery')" class="btn btn-danger">Create Gallery</a>
+                                    }
+                                    else if (auction != null)
+                                    {
+                                        <a href="/Home/AuctionDetail/@auction.Id" class="btn btn-dark">Go to Auction</a>
+                                    }
+                                    else
+                                    {
+                                        <a onclick="showInPopup('@Url.Action("CreateOrUpdate", "Auction", null, Context.Request.Scheme)', 'New Auction')" class="btn btn-warning">Create Auction</a>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <!-- /.card-body -->
+        </div>
+        <!-- /.card -->
+    </div>
+</div>
+
+<script>
+    let btnList = document.getElementsByClassName('btnDescription');
+    let shortList = document.getElementsByClassName('short-description');
+    let fullList = document.getElementsByClassName('full-description');
+
+    for (let i = 0; i < btnList.length; i++) {
+        btnList[i].addEventListener('click', () => {
+            if (btnList[i].value == "Expand") {
+                btnList[i].value = "Collapse";
+                shortList[i].classList.add('d-none');
+                fullList[i].classList.remove('d-none');
+            } else {
+                btnList[i].value = "Expand";
+                fullList[i].classList.add('d-none');
+                shortList[i].classList.remove('d-none');
+            }
+        })
+    }
+</script>

@@ -1,0 +1,176 @@
+﻿@model OnlineGallery.Models.Product
+
+@{
+    Layout = null;
+}
+
+<div class="row">
+    <div class="col-md-12">
+        <ul class="font-weight-bolder" style="list-style: none;">
+            <li><span asp-validation-for="Name" class="text-danger"></span></li>
+            <li><span asp-validation-for="Status" class="text-danger"></span></li>
+            <li><span asp-validation-for="Transmission" class="text-danger"></span></li>
+            <li><span asp-validation-for="FileImage" class="text-danger"></span></li>
+            <li><span asp-validation-for="Year" class="text-danger"></span></li>
+            <li><span asp-validation-for="Condition" class="text-danger"></span></li>
+            <li><span asp-validation-for="DefaultPrice" class="text-danger"></span></li>
+            <li><span asp-validation-for="Color" class="text-danger"></span></li>
+            <li><span asp-validation-for="Fuel" class="text-danger"></span></li>
+            <li><span asp-validation-for="Engine" class="text-danger"></span></li>
+            <li><span asp-validation-for="Mileage" class="text-danger"></span></li>
+            <li><span asp-validation-for="Doors" class="text-danger"></span></li>
+        </ul>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <form asp-action="CreateOrUpdate" enctype="multipart/form-data" asp-route-id="@Model.Id" onsubmit="setValue(); return jQueryAjaxPost(this);" autocomplete="off">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="Id" value="@Model.Id" />
+            <input type="hidden" asp-for="Status" value="false" />
+            <div class="row">
+                <div class="col-9">
+                    <div class="form-group">
+                        <label asp-for="Name" class="control-label"></label>
+                        <input asp-for="Name" class="form-control" />
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-4">
+                    <div class="form-group">
+                        <label asp-for="Transmission" class="control-label"></label>
+                        <select class="form-select form-control" aria-label="Select Transmission" asp-for="Transmission">
+                            <option value="">Select transmission</option>
+                            <option value="Manual">Manual</option>
+                            <option value="Automatic">Automatic</option>
+                            <option value="Continuous Variable">Continuous Variable</option>
+                            <option value="Dual Clutch">Dual Clutch</option>
+                        </select>
+                    </div>
+                </div>
+                @if (Model.Id == 0)
+                {
+                    <div class="col-7">
+                        <div class="form-group">
+                            <label asp-for="Image" class="control-label"></label>
+                            <input asp-for="FileImage" class="form-control" accept="image/*" />
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="col-4">
+                        <div class="form-group">
+                            <label class="control-label">Uploaded Image</label>
+                            <img src="~/images/@Model.Image" width="250" height="150" />
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="form-group">
+                            <label class="control-label">Replace Image</label>
+                            <input asp-for="FileImage" class="form-control" accept="image/*" value="@Model.Image" />
+                        </div>
+                    </div>
+                }
+            </div>
+            <div class="row">
+                <div class="col-2">
+                    <div class="form-group">
+                        <label asp-for="Year" class="control-label"></label>
+                        <input asp-for="Year" class="form-control" />
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="form-group">
+                        <label asp-for="Condition" class="control-label"></label>
+                        <input asp-for="Condition" class="form-control" />
+                    </div>
+                </div>
+                <div class="col-3">
+                    <div class="form-group">
+                        <label asp-for="DefaultPrice" class="control-label"></label>
+                        <input asp-for="DefaultPrice" class="form-control" />
+                    </div>
+                </div>
+                <div class="col-3">
+                    <div class="form-group">
+                        <label asp-for="Color" class="control-label"></label>
+                        <input asp-for="Color" class="form-control" />
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-4">
+                    <div class="form-group">
+                        <label asp-for="Fuel" class="control-label"></label>
+                        <input asp-for="Fuel" class="form-control" />
+
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="form-group">
+                        <label asp-for="Engine" class="control-label"></label>
+                        <input asp-for="Engine" class="form-control" />
+
+                    </div>
+                </div>
+                <div class="col-2">
+                    <div class="form-group">
+                        <label asp-for="Mileage" class="control-label"></label>
+                        <input asp-for="Mileage" class="form-control" />
+
+                    </div>
+                </div>
+                <div class="col-2">
+                    <div class="form-group">
+                        <label asp-for="Doors" class="control-label"></label>
+                        <input asp-for="Doors" class="form-control" />
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-12">
+                    <label asp-for="Description" class="control-label"></label>
+                    <input asp-for="Description" type="hidden" />
+                    <div id="toolbar-container"></div>
+                    <div class="border" id="editor"></div>
+                    @if (Model.Description != null)
+                    {
+                        <script>
+                            $("#editor").html($('#Description').val());
+                        </script>
+                    }
+                </div>
+            </div>
+            <div class="row mt-3">
+                <div class="col-12">
+                    <div class="form-group">
+                        <input type="submit" value="Submit" class="btn btn-primary btn-block" />
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    DecoupledEditor
+        .create(document.querySelector('#editor'))
+        .then(editor => {
+            const toolbarContainer = document.querySelector('#toolbar-container');
+
+            toolbarContainer.appendChild(editor.ui.view.toolbar.element);
+        })
+        .catch(error => {
+            console.error(error);
+        });
+
+    setValue = () => {
+        $('#editor').html() == "<p><br data-cke-filler=\"true\"></p>" ? $('#Description').val("") : $('#Description').val($('#editor').html());
+    };
+</script>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

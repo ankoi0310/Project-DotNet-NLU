@@ -1,0 +1,83 @@
+﻿@model IEnumerable<OnlineGallery.Areas.Identity.Data.ApplicationUser>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <table id="user" class="table table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th class="align-middle text-center">
+                                User ID
+                            </th>
+                            <th class="align-middle text-center">
+                                Full Name
+                            </th>
+                            <th class="align-middle text-center">
+                                Email
+                            </th>
+                            <th class="align-middle text-center">
+                                Phone Number
+                            </th>
+                            <th class="align-middle text-center">
+                                Email Confirmed
+                            </th>
+                            <th class="align-middle text-center">
+                                Phone Number Confirmed
+                            </th>
+                            <th class="align-middle text-center">
+                                Role
+                            </th>
+                            <th class="align-middle text-center">
+                                Status
+                            </th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>
+                                    @item.Id
+                                </td>
+                                <td>
+                                    @item.FullName
+                                </td>
+                                <td>
+                                    @item.Email
+                                </td>
+                                <td>
+                                    @item.PhoneNumber
+                                </td>
+                                <td>
+                                    @item.EmailConfirmed
+                                </td>
+                                <td>
+                                    @item.PhoneNumberConfirmed
+                                </td>
+                                <td>
+
+                                </td>
+                                <td>
+
+                                </td>
+                                <td>
+                                    <form asp-action="Delete" asp-route-id="@item.Id" onsubmit="return jQueryAjaxDelete(this);" class="d-inline">
+                                        <input type="submit" value="Delete" class="btn btn-danger" />
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <!-- /.card-body -->
+        </div>
+        <!-- /.card -->
+    </div>
+</div>
+
+<script>
+
+</script>
