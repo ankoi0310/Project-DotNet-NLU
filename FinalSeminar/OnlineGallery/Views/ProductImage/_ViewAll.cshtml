@@ -8,7 +8,7 @@
     <div class="col-12">
         <div class="card">
             <div class="card-body">
-                <table id="image" class="table table-bordered table-striped">
+                <table id="product-image" class="table table-bordered table-striped">
                     <thead>
                         <tr>
                             <th class="align-middle text-center">
@@ -16,9 +16,6 @@
                             </th>
                             <th class="align-middle text-center">
                                 @Html.DisplayNameFor(item => item.ProductId)
-                            </th>
-                            <th class="align-middle text-center">
-                                @Html.DisplayNameFor(item => item.Image)
                             </th>
                             <th class="align-middle text-center">
                                 Uploaded Image
@@ -32,23 +29,20 @@
                         @foreach (var item in Model)
                         {
                             ViewBag.Count++;
-                            <tr>
-                                <td>
+                            <tr style="height: 270px;">
+                                <td class="align-middle text-center">
                                     @ViewBag.Count
                                 </td>
-                                <td>
+                                <td class="align-middle">
                                     @if (item.Product != null)
                                     {
                                         @item.Product.Name
                                     }
                                 </td>
                                 <td>
-                                    @item.Image
-                                </td>
-                                <td>
                                     <img src="@("~/images/" + item.Image)" class="product" asp-append-version="true" />
                                 </td>
-                                <td>
+                                <td class="align-middle text-center">
                                     <a onclick="showInPopup('@Url.Action("CreateOrUpdate", "ProductImage", new { item.Id }, Context.Request.Scheme)', 'Update Image')" class="btn btn-info">@*<i class="fas fa-pencil-alt"></i>*@ Edit</a>
                                     <form asp-action="Delete" asp-route-id="@item.Id" onsubmit="return jQueryAjaxDelete(this);" class="d-inline">
                                         <input type="submit" value="Delete" class="btn btn-danger" />

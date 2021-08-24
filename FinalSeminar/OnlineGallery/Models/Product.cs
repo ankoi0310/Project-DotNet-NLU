@@ -74,6 +74,6 @@ namespace OnlineGallery.Models
         [Column("Status", TypeName = "bit")]
         public bool Status { get; set; }
 
-        public List<Auction> Auctions { get; set; }
+        public Auction Auction { get; set; }
     }
 }

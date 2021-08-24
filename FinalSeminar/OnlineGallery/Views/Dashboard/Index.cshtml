@@ -1,7 +1,17 @@
-﻿@{
+﻿@using Microsoft.AspNetCore.Identity;
+@using OnlineGallery.Areas.Identity.Data;
+@using OnlineGallery.Data;
+
+@inject ApplicationDbContext context
+@inject UserManager<ApplicationUser> userManager 
+
+@{
     ViewData["Title"] = "Dashboard";
     ViewData["Dashboard"] = "active";
     Layout = "~/Views/Shared/_DashboardLayout.cshtml";
+
+    var user = await userManager.GetUserAsync(Context.User);
+    var count = context.MyFavorites.Where(e => e.UserId == user.Id).Count();
 }
 
 <div class="dashboard-widget mb-40">
@@ -37,7 +47,7 @@
                     <img src="~/assets/images/dashboard/03.png" alt="dashboard">
                 </div>
                 <div class="content">
-                    <h2 class="title"><span class="counter">115</span></h2>
+                    <h2 class="title"><span class="counter">@count</span></h2>
                     <h6 class="info">Favorites</h6>
                 </div>
             </div>

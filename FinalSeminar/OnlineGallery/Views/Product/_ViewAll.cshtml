@@ -34,30 +34,6 @@
                     <tbody>
                         @foreach (var item in Model)
                         {
-                            Auction auction = Tools.GetAuctionFromProduct(context, item.Id);
-                            if (item.Status)
-                            {
-                                if (auction != null)
-                                {
-                                    ViewBag.Status = "Currently being auctioned";
-                                }
-                                else
-                                {
-                                    ViewBag.Status = "On sale";
-                                }
-                            }
-                            else
-                            {
-                                if (Tools.CheckGalleryProduct(context, item.Id))
-                                {
-                                    ViewBag.Status = "Sold";
-                                }
-                                else
-                                {
-                                    ViewBag.Status = "Haven't updated gallery yet";
-                                }
-                            }
-
                             <tr>
                                 <td>
                                     @item.Name <br />
@@ -67,7 +43,7 @@
                                     }
                                     else
                                     {
-                                        <a onclick="showInPopup('@Url.Action("AddImage", "Product", new { item.Id }, Context.Request.Scheme)', 'Update Product')" class="text-danger font-weight-bolder" style="cursor: pointer;">Please update image for this product</a>
+                                        <span class="text-danger font-weight-bolder">Please update image for this product</span>
                                     }
                                 </td>
                                 <td>
@@ -86,9 +62,9 @@
                                 <td>
                                     @if (item.Description != null)
                                     {
-                                        if (item.Description.Length > 600)
+                                        if (item.Description.Length > 500)
                                         {
-                                            var shortDescription = item.Description.Substring(0, 600);
+                                            var shortDescription = item.Description.Substring(0, 500);
                                             <span class="full-description d-none">@item.Description</span>
                                             <span class="short-description">@shortDescription...</span>
                                             <input class="btnDescription font-weight-bolder bg-transparent border-0" type="button" value="Expand" />
@@ -99,28 +75,60 @@
                                         }
                                     }
                                 </td>
-                                <td>
-                                    @item.DefaultPrice
+                                <td class="text-center">
+                                    @item.DefaultPrice.Value.ToString("C")
                                 </td>
-                                <td>
-                                    @ViewBag.Status
-                                </td>
-                                <td>
-                                    <a onclick="showInPopup('@Url.Action("CreateOrUpdate", "Product", new { item.Id }, Context.Request.Scheme)', 'Update Product')" class="btn btn-info">@*<i class="fas fa-pencil-alt"></i>*@ Edit</a>
-                                    @*<form asp-action="Sold" asp-route-id="@item.Id" onsubmit="return jQueryAjaxSoldConfirm(this);" class="d-inline">
-                                            <input type="submit" value="Sold" class="btn btn-danger" />
-                                        </form>*@
-                                    @if (!Tools.CheckGalleryProduct(context, item.Id))
+                                <td class="text-center">
+                                    @if (item.Status)
                                     {
-                                        <a onclick="showInPopup('@Url.Action("CreateOrUpdate", "ProductImage", null, Context.Request.Scheme)', 'New Gallery')" class="btn btn-danger">Create Gallery</a>
-                                    }
-                                    else if (auction != null)
-                                    {
-                                        <a href="/Home/AuctionDetail/@auction.Id" class="btn btn-dark">Go to Auction</a>
+                                        if (item.Auction != null)
+                                        {
+                                            <span class='font-weight-bolder text-success'>Currently being auctioned</span>
+                                        }
+                                        else
+                                        {
+                                            <span class='font-weight-bolder text-primary'>On sale</span>
+                                        }
                                     }
                                     else
                                     {
-                                        <a onclick="showInPopup('@Url.Action("CreateOrUpdate", "Auction", null, Context.Request.Scheme)', 'New Auction')" class="btn btn-warning">Create Auction</a>
+                                        if (item.Image == null)
+                                        {
+                                            <span class='font-weight-bolder text-secondary'>Haven't updated image yet</span>
+                                        }
+                                        else if (!Tools.CheckGalleryProduct(context, item.Id))
+                                        {
+                                            <span class='font-weight-bolder text-warning'>Haven't updated gallery yet</span>
+                                        }
+                                        else
+                                        {
+                                            <span class='font-weight-bolder text-danger'>Sold</span>
+                                        }
+                                    }
+                                </td>
+                                <td class="text-center">
+                                    @if (item.Image != null)
+                                    {
+                                        if (item.Auction != null)
+                                        {
+                                            <a href="/Home/AuctionDetail/@item.Auction.Id" class="btn btn-dark">Go to Auction</a>
+                                        }
+                                        else
+                                        {
+                                            <a onclick="showInPopup('@Url.Action("CreateOrUpdate", "Product", new { item.Id }, Context.Request.Scheme)', 'Update Product')" class="btn btn-info">Edit</a>
+                                            if (!Tools.CheckGalleryProduct(context, item.Id))
+                                            {
+                                                <a onclick="showInPopup('@Url.Action("AddGallery", "ProductImage", new { item.Id }, Context.Request.Scheme)', 'New Gallery')" class="btn btn-warning">Create Gallery</a>
+                                            }
+                                            else
+                                            {
+                                                <a onclick="showInPopup('@Url.Action("CreateAuction", "Auction", new { item.Id }, Context.Request.Scheme)', 'New Auction')" class="btn btn-primary">Create Auction</a>
+                                            }
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <a onclick="showInPopup('@Url.Action("AddImage", "Product", new { item.Id }, Context.Request.Scheme)', 'Update Product')" class="btn btn-danger">Add Image</a>
                                     }
                                 </td>
                             </tr>

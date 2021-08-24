@@ -21,12 +21,74 @@ jQueryAjaxPost = (form) => {
             success: function (res) {
                 if (res.isValid) {
                     $("#view-all").html(res.html);
-                    setInterval('location.reload()', 100);
                     $("#form-modal").modal('hide');
                     $("#form-modal .modal-body").html('');
                     $("#form-modal .modal-title").html('');
+                    location.reload();
                 } else {
                     $("#form-modal .modal-body").html(res.html);
+                }
+            },
+            error: function (err) {
+                console.log(err);
+            }
+        })
+    } catch (e) {
+        console.log(e);
+    }
+
+    return false;
+}
+
+bidding = (form) => {
+    try {
+        $.ajax({
+            type: "POST",
+            url: form.action,
+            data: new FormData(form),
+            contentType: false,
+            processData: false,
+            success: function (res) {
+                if (res.isValid) {
+                    location.reload();
+                } else {
+                    $.notify(res.status, { globalPosition: "top center", className: "error" });
+                }
+            },
+            error: function (err) {
+                window.location.href = form.action;
+            }
+        })
+    } catch (e) {
+        console.log(e);
+    }
+
+    return false;
+}
+
+jQueryAjaxFavorites = (url) => {
+    try {
+        $.ajax({
+            type: "POST",
+            url: url,
+            data: null,
+            contentType: false,
+            processData: false,
+            success: function (res) {
+                if (res.id != 0) {
+                    if (res.like) {
+                        $("#like-feature-" + res.id).html("<i class='fas fa-star'></i>");
+                        $("#like-" + res.id).html("<i class='fas fa-star'></i>");
+                        $("#like-detail-" + res.id).html("<span><i class='fas fa-star'></i>&nbsp;You have liked this</span>");
+                        $.notify(res.status, { globalPosition: "top center", className: "success" });
+                    } else {
+                        $("#like-feature-" + res.id).html("<i class='far fa-star'></i>")
+                        $("#like-" + res.id).html("<i class='far fa-star'></i>")
+                        $("#like-detail-" + res.id).html("<span><i class='far fa-star'></i>&nbsp;Add to your favorites</span>");
+                        $.notify(res.status, { globalPosition: "top center", className: "error" });
+                    }
+                } else {
+                    $.notify(res.status, { globalPosition: "top center", className: "error" });
                 }
             },
             error: function (err) {
@@ -51,8 +113,7 @@ jQueryAjaxDelete = form => {
                 processData: false,
                 success: function (res) {
                     $("#view-all").html(res.html);
-                    setInterval('location.reload()', 100);
-                    //$.notify("Deleted successfully", { globalPosition: "top center", className: "success" });
+                    location.reload();
                 },
                 error: function (err) {
                     console.log(err);
@@ -66,8 +127,8 @@ jQueryAjaxDelete = form => {
     return false;
 }
 
-jQueryAjaxSoldConfirm = form => {
-    if (confirm("Do you confirm the product has been sold?")) {
+lockoutUser = form => {
+    if (confirm("Are you sure to do this action?")) {
         try {
             $.ajax({
                 type: "POST",
@@ -76,8 +137,7 @@ jQueryAjaxSoldConfirm = form => {
                 contentType: false,
                 processData: false,
                 success: function (res) {
-                    $("#view-all").html(res.html);
-                    setInterval('location.reload()', 100);
+                    location.reload();
                 },
                 error: function (err) {
                     console.log(err);
@@ -86,6 +146,70 @@ jQueryAjaxSoldConfirm = form => {
         } catch (e) {
             console.log(e);
         }
+    }
+
+    return false;
+}
+
+addToCart = (url) => {
+    try {
+        $.ajax({
+            type: "POST",
+            url: url,
+            data: null,
+            contentType: false,
+            processData: false,
+            success: function (res) {
+                if (res.id != 0) {
+                    if (res.add) {
+                        //$("#like-feature-" + res.id).html("<i class='fas fa-star'></i>");
+                        //$("#like-" + res.id).html("<i class='fas fa-star'></i>");
+                        //$("#like-detail-" + res.id).html("<span><i class='fas fa-star'></i>&nbsp;You have liked this</span>");
+                        $.notify(res.status, { globalPosition: "top center", className: "success" });
+                    } else {
+                        //$("#like-feature-" + res.id).html("<i class='far fa-star'></i>")
+                        //$("#like-" + res.id).html("<i class='far fa-star'></i>")
+                        //$("#like-detail-" + res.id).html("<span><i class='far fa-star'></i>&nbsp;Add to your favorites</span>");
+                        $.notify(res.status, { globalPosition: "top center", className: "error" });
+                    }
+                } else {
+                    $.notify(res.status, { globalPosition: "top center", className: "error" });
+                }
+            },
+            error: function (err) {
+                console.log(err);
+            }
+        })
+    } catch (e) {
+        console.log(e);
+    }
+
+    return false;
+}
+
+removeFromCart = (url) => {
+    try {
+        $.ajax({
+            type: "POST",
+            url: url,
+            data: null,
+            contentType: false,
+            processData: false,
+            success: function (res) {
+                if (res.remove) {
+                    $.notify(res.status, { globalPosition: "top center", className: "success" });
+                    if ($("#cart-body").html() == "") {
+                        $("#cart-body").html("<tr><td colspan='4' class='align-middle text-center'>No data available in table</td></tr>");
+                    }
+                    console.log($("#cart-body").html());
+                }
+            },
+            error: function (err) {
+                console.log(err);
+            }
+        })
+    } catch (e) {
+        console.log(e);
     }
 
     return false;

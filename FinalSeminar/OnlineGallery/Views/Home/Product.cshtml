@@ -1,9 +1,21 @@
-﻿@model IEnumerable<OnlineGallery.Models.Product>
+﻿@using Microsoft.EntityFrameworkCore;
+@using OnlineGallery.Areas.Identity.Data;
+@using Microsoft.AspNetCore.Identity;
+@using OnlineGallery.Data;
+
+@model IEnumerable<OnlineGallery.Models.Product>
+
+@inject ApplicationDbContext context
+@inject UserManager<ApplicationUser> userManager
 
 @{
     ViewData["Title"] = "Product";
 
-    var featuredList = Model.OrderByDescending(key => key.Id).Take(3).OrderBy(key => key.Id);
+    int pageSize = 3;
+
+    var featuredList = context.Products.Where(e => e.Status).ToList().OrderByDescending(key => key.Id).Take(3).OrderBy(key => key.Id);
+
+    var user = await userManager.GetUserAsync(Context.User);
 }
 
 <!--============= Hero Section Starts Here =============-->
@@ -33,8 +45,21 @@
                 <div class="col-sm-10 col-md-6 col-lg-4">
                     <div class="auction-item-2">
                         <div class="auction-thumb">
-                            <a href="~/Home/ProductDetail/@item.Id"><img src="~/images/@item.Image" alt="car"></a>
-                            <a href="#0" class="rating"><i class="far fa-star"></i></a>
+                            <a href="~/Home/ProductDetail/@item.Id" title="Go to detail"><img src="~/images/@item.Image" alt="car"></a>
+                            <a href="~/Home/AddOrRemoveFavorites/@item.Id" id="like-feature-@(item.Id)" onclick="return jQueryAjaxFavorites('@Url.Action("AddOrRemoveFavorites", "Home", new { item.Id }, Context.Request.Scheme)');" class="rating">
+                                @if (user != null && Tools.IsMyFavorites(context, user.Id, item.Id))
+                                {
+                                    <i class="fas fa-star"></i>
+                                }
+                                else
+                                {
+                                    <i class="far fa-star"></i>
+                                }
+                            </a>
+                            @if (item.Auction != null)
+                            {
+                                <a href="~/Home/AuctionDetail/@item.Auction.Id" class="bid" title="Go to this auction"><i class="flaticon-auction"></i></a>
+                            }
                         </div>
                         <div class="auction-content">
                             <h6 class="title">
@@ -99,8 +124,20 @@
                     <div class="auction-item-2">
                         <div class="auction-thumb">
                             <a href="~/Home/ProductDetail/@item.Id"><img src="~/images/@item.Image" alt="product"></a>
-                            <a href="#0" class="rating"><i class="far fa-star"></i></a>
-                            <a href="#0" class="bid"><i class="flaticon-auction"></i></a>
+                            <a href="~/Home/AddOrRemoveFavorites/@item.Id" id="like-@(item.Id)" onclick="return jQueryAjaxFavorites('@Url.Action("AddOrRemoveFavorites", "Home", new { item.Id }, Context.Request.Scheme)');" class="rating">
+                                @if (user != null && Tools.IsMyFavorites(context, user.Id, item.Id))
+                                {
+                                    <i class="fas fa-star"></i>
+                                }
+                                else
+                                {
+                                    <i class="far fa-star"></i>
+                                }
+                            </a>
+                            @if (item.Auction != null)
+                            {
+                                <a href="~/Home/AuctionDetail/@item.Auction.Id" class="bid"><i class="flaticon-auction"></i></a>
+                            }
                         </div>
                         <div class="auction-content">
                             <h6 class="title">
@@ -126,21 +163,40 @@
             }
         </div>
         <ul class="pagination">
-            <li>
-                <a href="#0"><i class="flaticon-left-arrow"></i></a>
-            </li>
-            <li>
-                <a href="#0">1</a>
-            </li>
-            <li>
-                <a href="#0" class="active">2</a>
-            </li>
-            <li>
-                <a href="#0">3</a>
-            </li>
-            <li>
-                <a href="#0"><i class="flaticon-right-arrow"></i></a>
-            </li>
+            @{
+                decimal totalSize = await context.Products.Where(e => e.Status).CountAsync();
+                decimal totalPage = Math.Ceiling(totalSize / pageSize);
+                if (ViewBag.CurrentPage == 1)
+                {
+                    <li>
+                        <a href="~/Home/Product?page=@(totalPage)"><i class="flaticon-left-arrow"></i></a>
+                    </li>
+                }
+                else
+                {
+                    <li>
+                        <a href="~/Home/Product?page=@(ViewBag.CurrentPage - 1)"><i class="flaticon-left-arrow"></i></a>
+                    </li>
+                }
+                for (int i = 1; i <= totalPage; i++)
+                {
+                    <li>
+                        <a href="~/Home/Product?page=@i">@i</a>
+                    </li>
+                }
+                if (ViewBag.CurrentPage == totalPage)
+                {
+                    <li>
+                        <a href="~/Home/Product?page=1"><i class="flaticon-right-arrow"></i></a>
+                    </li>
+                }
+                else
+                {
+                    <li>
+                        <a href="~/Home/Product?page=@(ViewBag.CurrentPage + 1)"><i class="flaticon-right-arrow"></i></a>
+                    </li>
+                }
+            }
         </ul>
     </div>
 </div>

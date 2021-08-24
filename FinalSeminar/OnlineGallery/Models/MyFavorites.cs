@@ -1,4 +1,5 @@
-﻿using System;
+﻿using OnlineGallery.Areas.Identity.Data;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
@@ -16,7 +17,7 @@ namespace OnlineGallery.Models
         [Column("UserId", TypeName = "nvarchar(450)")]
         public string UserId { get; set; }
         [ForeignKey("UserId")]
-        public User User { get; set; }
+        public ApplicationUser User { get; set; }
 
         [Key]
         [DisplayName("Product")]

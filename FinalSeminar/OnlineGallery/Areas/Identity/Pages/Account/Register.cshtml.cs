@@ -73,6 +73,8 @@ namespace OnlineGallery.Areas.Identity.Pages.Account
         {
             ReturnUrl = returnUrl;
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
+            _logger.LogInformation("User logged out.");
+            await _signInManager.SignOutAsync();
         }
 
         public async Task<IActionResult> OnPostAsync(string returnUrl = null)

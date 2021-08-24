@@ -1,0 +1,12 @@
+﻿@model IEnumerable<OnlineGallery.Models.Auction>
+
+@{
+    ViewData["Title"] = "Auction";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<h1 class="text-center"><i class="fa fa-gavel"></i>&ensp;@ViewData["Title"]</h1>
+
+<div id="view-all">
+    @await Html.PartialAsync("_ViewAll", Model)
+</div>

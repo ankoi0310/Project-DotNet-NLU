@@ -1,5 +1,18 @@
-﻿@{
+﻿@using Microsoft.EntityFrameworkCore;
+@using OnlineGallery.Areas.Identity.Data;
+@using Microsoft.AspNetCore.Identity;
+@using OnlineGallery.Data;
+
+@inject ApplicationDbContext context
+@inject UserManager<ApplicationUser> userManager
+
+@{
     ViewData["Title"] = "Home Page";
+
+    var user = await userManager.GetUserAsync(User);
+    var featuredList = context.Auctions.Where(e => e.Status).OrderByDescending(key => key.Id).Take(3).OrderBy(key => key.Id);
+    var trendingList = context.Products.Where(e => e.Status).ToList().OrderByDescending(key => key.Id).Take(3).OrderBy(key => key.Id);
+    var endingAuctions = await context.Auctions.Where(e => e.ClosingDay.Value.CompareTo(DateTime.Now.AddDays(1)) < 0).ToListAsync();
 }
 
 <!--============= Banner Section Starts Here =============-->
@@ -87,135 +100,60 @@
             <a href="~/Home/Auction" class="normal-button">View All</a>
         </div>
         <div class="row justify-content-center mb-30-none">
-            <div class="col-sm-10 col-md-6 col-lg-4">
-                <div class="auction-item-2">
-                    <div class="auction-thumb">
-                        <a href="product-details.html"><img src="~/assets/images/auction/car/auction-1.jpg" alt="car"></a>
-                        <a href="#0" class="rating"><i class="far fa-star"></i></a>
-                        <a href="#0" class="bid"><i class="flaticon-auction"></i></a>
-                    </div>
-                    <div class="auction-content">
-                        <h6 class="title">
-                            <a href="product-details.html">2018 Hyundai Sonata</a>
-                        </h6>
-                        <div class="bid-area">
-                            <div class="bid-amount">
-                                <div class="icon">
-                                    <i class="flaticon-auction"></i>
-                                </div>
-                                <div class="amount-content">
-                                    <div class="current">Current Bid</div>
-                                    <div class="amount">$876.00</div>
-                                </div>
-                            </div>
-                            <div class="bid-amount">
-                                <div class="icon">
-                                    <i class="flaticon-money"></i>
-                                </div>
-                                <div class="amount-content">
-                                    <div class="current">Buy Now</div>
-                                    <div class="amount">$5,00.00</div>
-                                </div>
-                            </div>
+            @foreach (var item in featuredList)
+            {
+                var lastBidPrice = item.AuctionRecords != null ? item.AuctionRecords.Select(e => e.BidPrice).Last() : item.StartingPrice;
+                var bids = await context.AuctionRecords.Where(e => e.AuctionId == item.Id).CountAsync();
+
+                <div class="col-sm-10 col-md-6 col-lg-4">
+                    <div class="auction-item-2">
+                        <div class="auction-thumb">
+                            <a href="~/Home/AuctionDetail/@item.Id" title="Go to detail"><img src="~/images/@item.Product.Image" alt="car"></a>
+                            <a href="~/Home/AddOrRemoveFavorites/@item.Product.Id" id="like-feature-@(item.Product.Id)" onclick="return jQueryAjaxFavorites('@Url.Action("AddOrRemoveFavorites", "Home", new { item.Product.Id }, Context.Request.Scheme)');" class="rating">
+                                @if (user != null && Tools.IsMyFavorites(context, user.Id, item.Product.Id))
+                                {
+                                    <i class="fas fa-star"></i>
+                                }
+                                else
+                                {
+                                    <i class="far fa-star"></i>
+                                }
+                            </a>
                         </div>
-                        <div class="countdown-area">
-                            <div class="countdown">
-                                <div id="bid_counter26"></div>
-                            </div>
-                            <span class="total-bids">30 Bids</span>
-                        </div>
-                        <div class="text-center">
-                            <a href="#0" class="custom-button">Submit a bid</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-sm-10 col-md-6 col-lg-4">
-                <div class="auction-item-2">
-                    <div class="auction-thumb">
-                        <a href="product-details.html"><img src="~/assets/images/auction/car/auction-2.jpg" alt="car"></a>
-                        <a href="#0" class="rating"><i class="far fa-star"></i></a>
-                        <a href="#0" class="bid"><i class="flaticon-auction"></i></a>
-                    </div>
-                    <div class="auction-content">
-                        <h6 class="title">
-                            <a href="product-details.html">2018 Nissan Versa, S</a>
-                        </h6>
-                        <div class="bid-area">
-                            <div class="bid-amount">
-                                <div class="icon">
-                                    <i class="flaticon-auction"></i>
+                        <div class="auction-content">
+                            <h6 class="title">
+                                <a href="#0">@item.Product.Name</a>
+                            </h6>
+                            <div class="bid-area">
+                                <div class="bid-amount">
+                                    <div class="icon">
+                                        <i class="flaticon-auction"></i>
+                                    </div>
+                                    <div class="amount-content">
+                                        <div class="current">Current Bid</div>
+                                        <div class="amount">@lastBidPrice.Value.ToString("C")</div>
+                                    </div>
                                 </div>
-                                <div class="amount-content">
-                                    <div class="current">Current Bid</div>
-                                    <div class="amount">$876.00</div>
+                                <div class="bid-amount">
+                                    <div class="icon">
+                                        <i class="flaticon-money"></i>
+                                    </div>
+                                    <div class="amount-content">
+                                        <div class="current">Buy Now</div>
+                                        <div class="amount">@item.Product.DefaultPrice.Value.ToString("C")</div>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="bid-amount">
-                                <div class="icon">
-                                    <i class="flaticon-money"></i>
+                            <div class="countdown-area">
+                                <div class="countdown">
+                                    <div id="counter@(item.Id)" data-countdown="@item.ClosingDay.Value.ToString("MM/dd/yyyy")"></div>
                                 </div>
-                                <div class="amount-content">
-                                    <div class="current">Buy Now</div>
-                                    <div class="amount">$5,00.00</div>
-                                </div>
+                                <span class="total-bids">@bids Bids</span>
                             </div>
-                        </div>
-                        <div class="countdown-area">
-                            <div class="countdown">
-                                <div id="bid_counter27"></div>
-                            </div>
-                            <span class="total-bids">30 Bids</span>
-                        </div>
-                        <div class="text-center">
-                            <a href="#0" class="custom-button">Submit a bid</a>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="col-sm-10 col-md-6 col-lg-4">
-                <div class="auction-item-2">
-                    <div class="auction-thumb">
-                        <a href="product-details.html"><img src="~/assets/images/auction/car/auction-3.jpg" alt="car"></a>
-                        <a href="#0" class="rating"><i class="far fa-star"></i></a>
-                        <a href="#0" class="bid"><i class="flaticon-auction"></i></a>
-                    </div>
-                    <div class="auction-content">
-                        <h6 class="title">
-                            <a href="product-details.html">2018 Honda Accord, Sport</a>
-                        </h6>
-                        <div class="bid-area">
-                            <div class="bid-amount">
-                                <div class="icon">
-                                    <i class="flaticon-auction"></i>
-                                </div>
-                                <div class="amount-content">
-                                    <div class="current">Current Bid</div>
-                                    <div class="amount">$876.00</div>
-                                </div>
-                            </div>
-                            <div class="bid-amount">
-                                <div class="icon">
-                                    <i class="flaticon-money"></i>
-                                </div>
-                                <div class="amount-content">
-                                    <div class="current">Buy Now</div>
-                                    <div class="amount">$5,00.00</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="countdown-area">
-                            <div class="countdown">
-                                <div id="bid_counter28"></div>
-                            </div>
-                            <span class="total-bids">30 Bids</span>
-                        </div>
-                        <div class="text-center">
-                            <a href="#0" class="custom-button">Submit a bid</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            }
         </div>
     </div>
 </section>
@@ -231,186 +169,84 @@
             <a href="~/Home/Product" class="normal-button">View All</a>
         </div>
         <div class="row justify-content-center mb-30-none">
-            <div class="col-md-6 col-lg-12">
-                <div class="auction-item-6">
-                    <div class="auction-inner">
-                        <div class="auction-thumb">
-                            <a href="product-details.html"><img src="~/assets/images/auction/trending/auction-1.png" alt="trending"></a>
-                            <a href="#0" class="rating"><i class="far fa-star"></i></a>
-                            <a href="#0" class="bid"><i class="flaticon-auction"></i></a>
-                        </div>
-                        <div class="auction-content">
-                            <h5 class="title"><a href="product-details.html">2016 KIA Optima, EX</a></h5>
-                            <div class="item-information">
-                                <ul>
-                                    <li><span>Number</span>1-38005900</li>
-                                    <li><span>VIN</span>2G1WG5EK3B1312245</li>
-                                    <li><span>Milage</span> 153k miles (246k km)</li>
-                                    <li><span>Location</span>Sandston (VA)</li>
-                                </ul>
-                                <ul>
-                                    <li><span>Engine</span>2.0 Diesel</li>
-                                    <li><span>Transmission</span>Automated</li>
-                                    <li><span>Body</span>Offroad car</li>
-                                </ul>
+            @foreach (var item in trendingList)
+            {
+                <div class="col-md-6 col-lg-12">
+                    <div class="auction-item-6">
+                        <div class="auction-inner">
+                            <div class="auction-thumb">
+                                <a href="~/Home/ProductDetail/@item.Id"><img src="~/images/@item.Image" alt="trending"></a>
+                                <a href="~/Home/AddOrRemoveFavorites/@item.Id" id="like-feature-@(item.Id)" onclick="return jQueryAjaxFavorites('@Url.Action("AddOrRemoveFavorites", "Home", new { item.Id }, Context.Request.Scheme)');" class="rating">
+                                    @if (user != null && Tools.IsMyFavorites(context, user.Id, item.Id))
+                                    {
+                                        <i class="fas fa-star"></i>
+                                    }
+                                    else
+                                    {
+                                        <i class="far fa-star"></i>
+                                    }
+                                </a>
+                                @if (item.Auction != null)
+                                {
+                                    <a href="~/Home/AuctionDetail/@item.Auction.Id" class="bid" title="Go to this auction"><i class="flaticon-auction"></i></a>
+                                }
                             </div>
-                        </div>
-                        <div class="auction-bidding">
-                            <div class="countdown">
-                                <div id="bid_counter3"></div>
-                            </div>
-                            <div class="bid-amount">
-                                <div class="icon">
-                                    <i class="flaticon-auction"></i>
+                            <div class="auction-content">
+                                <h5 class="title"><a href="~/Home/ProductDetail/@item.Id">@item.Name</a></h5>
+                                <div class="item-information">
+                                    <ul>
+                                        <li><span>Number</span>@item.Id</li>
+                                        <li><span>Condition</span>@item.Condition</li>
+                                        <li><span>Color</span>@item.Color</li>
+                                        <li><span>Year</span>@item.Year</li>
+                                        <li><span>Fuel</span>@item.Fuel</li>
+                                    </ul>
+                                    <ul>
+                                        <li><span>Milage</span>@item.Mileage</li>
+                                        <li><span>Engine</span>@item.Engine</li>
+                                        <li><span>Transmission</span>@item.Transmission</li>
+                                        <li><span>Doors</span>@item.Doors</li>
+                                    </ul>
                                 </div>
-                                <div class="amount-content">
-                                    <div class="current">Current Bid</div>
-                                    <div class="amount">$876.00</div>
+                            </div>
+                            @if (item.Auction != null)
+                            {
+                                var lastBidPrice = item.Auction.AuctionRecords != null ? item.Auction.AuctionRecords.Select(e => e.BidPrice).Last() : item.Auction.StartingPrice;
+                                var bids = await context.AuctionRecords.Where(e => e.AuctionId == item.Id).CountAsync();
+
+                                <div class="auction-bidding">
+                                    <div class="countdown">
+                                        <div id="counter@(item.Auction.Id)" data-countdown="@item.Auction.ClosingDay.Value.ToString("MM/dd/yyyy")"></div>
+                                    </div>
+                                    <div class="bid-amount">
+                                        <div class="icon">
+                                            <i class="flaticon-auction"></i>
+                                        </div>
+                                        <div class="amount-content">
+                                            <div class="current">Current Bid</div>
+                                            <div class="amount">@lastBidPrice</div>
+                                        </div>
+                                    </div>
+                                    <div class="bids-area">
+                                        Total Bids : <span class="total-bids">@bids</span>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="bids-area">
-                                Total Bids : <span class="total-bids">130 Bids</span>
-                            </div>
-                            <a href="#0" class="custom-button">Submit a bid</a>
+                            }
+                            else
+                            {
+                                <div class="auction-bidding">
+                                    <div>
+                                        <form asp-action="AddToCart" asp-route-id="@item.Id" method="post" onsubmit="return addToCart('@Url.Action("AddToCart", "Home", new { item.Id }, Context.Request.Scheme)');">
+                                            <button type="submit" class="btn btn-primary text-white mt-4 mb-4">Add To Cart</button>
+                                        </form>
+                                        <button onclick="alert('buy now')" class="btn btn-success text-white">Buy Now</button>
+                                    </div>
+                                </div>
+                            }
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="col-md-6 col-lg-12">
-                <div class="auction-item-6">
-                    <div class="auction-inner">
-                        <div class="auction-thumb">
-                            <a href="product-details.html"><img src="~/assets/images/auction/trending/auction-2.png" alt="trending"></a>
-                            <a href="#0" class="rating"><i class="far fa-star"></i></a>
-                            <a href="#0" class="bid"><i class="flaticon-auction"></i></a>
-                        </div>
-                        <div class="auction-content">
-                            <h5 class="title"><a href="product-details.html">2019 Polaris General, 1000 Eps</a></h5>
-                            <div class="item-information">
-                                <ul>
-                                    <li><span>Number</span>1-38005900</li>
-                                    <li><span>VIN</span>2G1WG5EK3B1312245</li>
-                                    <li><span>Milage</span> 153k miles (246k km)</li>
-                                    <li><span>Location</span>Sandston (VA)</li>
-                                </ul>
-                                <ul>
-                                    <li><span>Engine</span>2.0 Diesel</li>
-                                    <li><span>Transmission</span>Automated</li>
-                                    <li><span>Body</span>Offroad car</li>
-                                </ul>
-                            </div>
-                        </div>
-                        <div class="auction-bidding">
-                            <div class="countdown">
-                                <div id="bid_counter4"></div>
-                            </div>
-                            <div class="bid-amount">
-                                <div class="icon">
-                                    <i class="flaticon-auction"></i>
-                                </div>
-                                <div class="amount-content">
-                                    <div class="current">Current Bid</div>
-                                    <div class="amount">$876.00</div>
-                                </div>
-                            </div>
-                            <div class="bids-area">
-                                Total Bids : <span class="total-bids">130 Bids</span>
-                            </div>
-                            <a href="#0" class="custom-button">Submit a bid</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6 col-lg-12">
-                <div class="auction-item-6">
-                    <div class="auction-inner">
-                        <div class="auction-thumb">
-                            <a href="product-details.html"><img src="~/assets/images/auction/trending/auction-3.png" alt="trending"></a>
-                            <a href="#0" class="rating"><i class="far fa-star"></i></a>
-                            <a href="#0" class="bid"><i class="flaticon-auction"></i></a>
-                        </div>
-                        <div class="auction-content">
-                            <h5 class="title"><a href="product-details.html">2018 Hyundai Elantra, Sel/Value/Limited</a></h5>
-                            <div class="item-information">
-                                <ul>
-                                    <li><span>Number</span>1-38005900</li>
-                                    <li><span>VIN</span>2G1WG5EK3B1312245</li>
-                                    <li><span>Milage</span> 153k miles (246k km)</li>
-                                    <li><span>Location</span>Sandston (VA)</li>
-                                </ul>
-                                <ul>
-                                    <li><span>Engine</span>2.0 Diesel</li>
-                                    <li><span>Transmission</span>Automated</li>
-                                    <li><span>Body</span>Offroad car</li>
-                                </ul>
-                            </div>
-                        </div>
-                        <div class="auction-bidding">
-                            <div class="countdown">
-                                <div id="bid_counter5"></div>
-                            </div>
-                            <div class="bid-amount">
-                                <div class="icon">
-                                    <i class="flaticon-auction"></i>
-                                </div>
-                                <div class="amount-content">
-                                    <div class="current">Current Bid</div>
-                                    <div class="amount">$876.00</div>
-                                </div>
-                            </div>
-                            <div class="bids-area">
-                                Total Bids : <span class="total-bids">130 Bids</span>
-                            </div>
-                            <a href="#0" class="custom-button">Submit a bid</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6 col-lg-12">
-                <div class="auction-item-6">
-                    <div class="auction-inner">
-                        <div class="auction-thumb">
-                            <a href="product-details.html"><img src="~/assets/images/auction/trending/auction-4.png" alt="trending"></a>
-                            <a href="#0" class="rating"><i class="far fa-star"></i></a>
-                            <a href="#0" class="bid"><i class="flaticon-auction"></i></a>
-                        </div>
-                        <div class="auction-content">
-                            <h5 class="title"><a href="product-details.html">2018 Toyota Camry, L/Le/Xle/Se/Xse</a></h5>
-                            <div class="item-information">
-                                <ul>
-                                    <li><span>Number</span>1-38005900</li>
-                                    <li><span>VIN</span>2G1WG5EK3B1312245</li>
-                                    <li><span>Milage</span> 153k miles (246k km)</li>
-                                    <li><span>Location</span>Sandston (VA)</li>
-                                </ul>
-                                <ul>
-                                    <li><span>Engine</span>2.0 Diesel</li>
-                                    <li><span>Transmission</span>Automated</li>
-                                    <li><span>Body</span>Offroad car</li>
-                                </ul>
-                            </div>
-                        </div>
-                        <div class="auction-bidding">
-                            <div class="countdown">
-                                <div id="bid_counter6"></div>
-                            </div>
-                            <div class="bid-amount">
-                                <div class="icon">
-                                    <i class="flaticon-auction"></i>
-                                </div>
-                                <div class="amount-content">
-                                    <div class="current">Current Bid</div>
-                                    <div class="amount">$876.00</div>
-                                </div>
-                            </div>
-                            <div class="bids-area">
-                                Total Bids : <span class="total-bids">130 Bids</span>
-                            </div>
-                            <a href="#0" class="custom-button">Submit a bid</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            }
         </div>
     </div>
 </section>
@@ -426,174 +262,39 @@
         </div>
         <div class="popular-auction-wrapper">
             <div class="row justify-content-center mb-40-none">
-                <div class="col-lg-6">
-                    <div class="auction-item-3">
-                        <div class="auction-thumb">
-                            <a href="product-details.html"><img src="~/assets/images/auction/ending/auction01.png" alt="ending"></a>
-                            <a href="#0" class="bid"><i class="flaticon-auction"></i></a>
-                        </div>
-                        <div class="auction-content">
-                            <h6 class="title">
-                                <a href="product-details.html">
-                                    2021 Honda Insight,
-                                    Touring
-                                </a>
-                            </h6>
-                            <div class="bid-amount">
-                                <div class="icon">
-                                    <i class="flaticon-auction"></i>
-                                </div>
-                                <div class="amount-content">
-                                    <div class="current">Current Bid</div>
-                                    <div class="amount">$876.00</div>
-                                </div>
+                @foreach (var item in endingAuctions)
+                {
+                    var lastBidPrice = item.AuctionRecords != null ? item.AuctionRecords.Select(e => e.BidPrice).Last() : item.StartingPrice;
+
+                    var bids = await context.AuctionRecords.Where(e => e.AuctionId == item.Id).CountAsync();
+                    <div class="col-lg-6">
+                        <div class="auction-item-3">
+                            <div class="auction-thumb">
+                                <a href="~/Home/AuctionDetail/@item.Id"><img src="~/images/@item.Product.Image" alt="ending"></a>
+
                             </div>
-                            <div class="bids-area">
-                                Total Bids : <span class="total-bids">130 Bids</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-6">
-                    <div class="auction-item-3">
-                        <div class="auction-thumb">
-                            <a href="product-details.html"><img src="~/assets/images/auction/ending/auction02.png" alt="ending"></a>
-                            <a href="#0" class="bid"><i class="flaticon-auction"></i></a>
-                        </div>
-                        <div class="auction-content">
-                            <h6 class="title">
-                                <a href="product-details.html">
-                                    2011 Hyundai Sonata,
-                                    Se/Limited
-                                </a>
-                            </h6>
-                            <div class="bid-amount">
-                                <div class="icon">
-                                    <i class="flaticon-auction"></i>
+                            <div class="auction-content">
+                                <h6 class="title">
+                                    <a href="~/Home/ProductDetail/@item.ProductId">
+                                        @item.Product.Name
+                                    </a>
+                                </h6>
+                                <div class="bid-amount">
+                                    <div class="icon">
+                                        <i class="flaticon-auction"></i>
+                                    </div>
+                                    <div class="amount-content">
+                                        <div class="current">Current Bid</div>
+                                        <div class="amount">@lastBidPrice.Value.ToString("C")</div>
+                                    </div>
                                 </div>
-                                <div class="amount-content">
-                                    <div class="current">Current Bid</div>
-                                    <div class="amount">$876.00</div>
+                                <div class="bids-area">
+                                    Total Bids : <span class="total-bids">@bids</span>
                                 </div>
-                            </div>
-                            <div class="bids-area">
-                                Total Bids : <span class="total-bids">130 Bids</span>
                             </div>
                         </div>
                     </div>
-                </div>
-                <div class="col-lg-6">
-                    <div class="auction-item-3">
-                        <div class="auction-thumb">
-                            <a href="product-details.html"><img src="~/assets/images/auction/ending/auction03.png" alt="ending"></a>
-                            <a href="#0" class="bid"><i class="flaticon-auction"></i></a>
-                        </div>
-                        <div class="auction-content">
-                            <h6 class="title">
-                                <a href="product-details.html">
-                                    2016 Dodge Grand
-                                    Caravan, Sxt
-                                </a>
-                            </h6>
-                            <div class="bid-amount">
-                                <div class="icon">
-                                    <i class="flaticon-auction"></i>
-                                </div>
-                                <div class="amount-content">
-                                    <div class="current">Current Bid</div>
-                                    <div class="amount">$876.00</div>
-                                </div>
-                            </div>
-                            <div class="bids-area">
-                                Total Bids : <span class="total-bids">130 Bids</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-6">
-                    <div class="auction-item-3">
-                        <div class="auction-thumb">
-                            <a href="product-details.html"><img src="~/assets/images/auction/ending/auction04.png" alt="ending"></a>
-                            <a href="#0" class="bid"><i class="flaticon-auction"></i></a>
-                        </div>
-                        <div class="auction-content">
-                            <h6 class="title">
-                                <a href="product-details.html">
-                                    2009 Jeep Wrangler
-                                    Unlimite, Sahara
-                                </a>
-                            </h6>
-                            <div class="bid-amount">
-                                <div class="icon">
-                                    <i class="flaticon-auction"></i>
-                                </div>
-                                <div class="amount-content">
-                                    <div class="current">Current Bid</div>
-                                    <div class="amount">$876.00</div>
-                                </div>
-                            </div>
-                            <div class="bids-area">
-                                Total Bids : <span class="total-bids">130 Bids</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-6">
-                    <div class="auction-item-3">
-                        <div class="auction-thumb">
-                            <a href="product-details.html"><img src="~/assets/images/auction/ending/auction05.png" alt="ending"></a>
-                            <a href="#0" class="bid"><i class="flaticon-auction"></i></a>
-                        </div>
-                        <div class="auction-content">
-                            <h6 class="title">
-                                <a href="product-details.html">
-                                    2009 Toyota Prius
-                                    (Medford, NY 11763)
-                                </a>
-                            </h6>
-                            <div class="bid-amount">
-                                <div class="icon">
-                                    <i class="flaticon-auction"></i>
-                                </div>
-                                <div class="amount-content">
-                                    <div class="current">Current Bid</div>
-                                    <div class="amount">$876.00</div>
-                                </div>
-                            </div>
-                            <div class="bids-area">
-                                Total Bids : <span class="total-bids">130 Bids</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-6">
-                    <div class="auction-item-3">
-                        <div class="auction-thumb">
-                            <a href="product-details.html"><img src="~/assets/images/auction/ending/auction06.png" alt="ending"></a>
-                            <a href="#0" class="bid"><i class="flaticon-auction"></i></a>
-                        </div>
-                        <div class="auction-content">
-                            <h6 class="title">
-                                <a href="product-details.html">
-                                    2019 Indian Motorcycle
-                                    Co. Scout, Bobber
-                                </a>
-                            </h6>
-                            <div class="bid-amount">
-                                <div class="icon">
-                                    <i class="flaticon-auction"></i>
-                                </div>
-                                <div class="amount-content">
-                                    <div class="current">Current Bid</div>
-                                    <div class="amount">$876.00</div>
-                                </div>
-                            </div>
-                            <div class="bids-area">
-                                Total Bids : <span class="total-bids">130 Bids</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                }
             </div>
             <div class="load-wrapper">
                 <a href="~/Auction" class="normal-button">See All Auction</a>

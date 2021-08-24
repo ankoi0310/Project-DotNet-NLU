@@ -1,6 +1,9 @@
-﻿@using OnlineGallery.Data
+﻿@using OnlineGallery.Areas.Identity.Data;
+@using Microsoft.AspNetCore.Identity;
+@using OnlineGallery.Data
 
 @inject ApplicationDbContext context
+@inject UserManager<ApplicationUser> userManager
 
 @model OnlineGallery.Models.Product
 
@@ -8,6 +11,7 @@
     ViewData["Title"] = "Product Detail";
 
     var imageList = Tools.GetProductImages(context, Model.Id);
+    var user = await userManager.GetUserAsync(Context.User);
 }
 
 <!--============= Hero Section Starts Here =============-->
@@ -71,8 +75,27 @@
                         </ul>
                     </div>
                     <div class="buy-now-area">
-                        <a href="#0" class="custom-button">Buy Now: @Model.DefaultPrice.Value.ToString("C")</a>
-                        <a href="#0" class="rating custom-button active border"><i class="fas fa-star"></i> Add to Favorites</a>
+                        <a href="#0" class="font-weight-bolder custom-button">Buy Now: @Model.DefaultPrice.Value.ToString("C")</a>
+                        <a href="#0" class="font-weight-bolder custom-button text-dark" style="background: -webkit-linear-gradient( 90deg, #f1a8fc 0%, #a17878 100%); ">
+                            <span><i class="fas fa-cart-plus"></i>&nbsp;Add to cart</span>
+                        </a>
+                        <a href="~/Home/AddOrRemoveFavorites/@Model.Id" id="like-detail-@(Model.Id)" onclick="return jQueryAjaxFavorites('@Url.Action("AddOrRemoveFavorites", "Home", new { Model.Id }, Context.Request.Scheme)');" class="rating custom-button active border">
+                            @if (user != null)
+                            {
+                                @if (Tools.IsMyFavorites(context, user.Id, Model.Id))
+                                {
+                                    <span class="font-weight-bolder"><i class="fas fa-star"></i>&nbsp;You have liked this</span>
+                                }
+                                else
+                                {
+                                    <span class="font-weight-bolder"><i class="far fa-star"></i>&nbsp;Add to your favorites</span>
+                                }
+                            }
+                            else
+                            {
+                                <span><i class="far fa-star"></i>&nbsp;Add to your favorites</span>
+                            }
+                        </a>
                         <div class="share-area">
                             <span>Share to:</span>
                             <ul>
@@ -93,16 +116,13 @@
                     </div>
                 </div>
             </div>
-            @{
-                Auction auction = Tools.GetAuctionFromProduct(context, Model.Id);
-                if (auction != null)
-                {
-                    <div class="col-lg-3">
-                        <form action="~/Home/AuctionDetail/@auction.Id" method="post">
-                            <input type="submit" class="bg-success font-weight-bolder" value="The auction is on. Join now!" />
-                        </form>
-                    </div>
-                }
+            @if (Model.Auction != null)
+            {
+                <div class="col-lg-3">
+                    <form action="~/Home/AuctionDetail/@Model.Auction.Id" method="post">
+                        <input type="submit" class="bg-success font-weight-bolder" value="The auction is on. Join now!" />
+                    </form>
+                </div>
             }
         </div>
     </div>

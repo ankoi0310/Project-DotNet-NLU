@@ -1,4 +1,13 @@
-﻿<header>
+﻿@using Microsoft.AspNetCore.Identity;
+@using OnlineGallery.Areas.Identity.Data;
+
+@inject UserManager<ApplicationUser> userManger
+
+@{
+    var user = await userManger.GetUserAsync(Context.User);
+}
+
+<header>
     <div class="header-top">
         <div class="container">
             <div class="header-top-wrapper">
@@ -9,11 +18,28 @@
                 </ul>
                 <ul class="cart-button-area">
                     <li>
-                        <a href="#" class="cart-button"><i class="flaticon-shopping-basket"></i><span class="amount">08</span></a>
+                        <a href="~/Home/Cart" class="cart-button">
+                            <i class="flaticon-shopping-basket"></i>
+                            @*<span class="amount" id="amount-in-cart">0</span>*@
+                        </a>
                     </li>
-                    <li>
-                        <a href="~/Dashboard/Profile" class="user-button"><i class="flaticon-user"></i></a>
-                    </li>
+                    @if (user == null)
+                    {
+                        <li>
+                            <a href="~/Identity/Account/Login" class="text-white">Login</a>
+                        </li>
+                        <li>
+                            <a href="~/Identity/Account/Register" class="text-white">Register</a>
+                        </li>
+                    }
+                    else
+                    {
+                        <li>
+                            <form asp-area="Identity" asp-page="/Account/Logout" method="post">
+                                <input type="submit" class="text-white border-0 bg-transparent" value="Logout" />
+                            </form>
+                        </li>
+                    }
                 </ul>
             </div>
         </div>
@@ -65,3 +91,7 @@
         </div>
     </div>
 </header>
+
+<script>
+
+</script>

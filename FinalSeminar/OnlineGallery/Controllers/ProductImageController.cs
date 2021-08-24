@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Hosting;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -12,6 +13,7 @@ using System.Threading.Tasks;
 
 namespace OnlineGallery.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class ProductImageController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -23,12 +25,7 @@ namespace OnlineGallery.Controllers
             _webHostEnvironment = webHostEnvironment;
         }
 
-        public IActionResult Index()
-        {
-            return View();
-        }
-
-        public async Task<IActionResult> List()
+        public async Task<IActionResult> Index()
         {
             await _context.Products.ToListAsync();
             return View(await _context.ProductImages.ToListAsync());
@@ -53,6 +50,14 @@ namespace OnlineGallery.Controllers
                 }
                 return View(productImage);
             }
+        }
+
+        // GET: Product/AddGallery/5
+        [NoDirectAccess]
+        public async Task<IActionResult> AddGallery(int id)
+        {
+            var product = await _context.Products.FindAsync(id);
+            return View(new ProductImage() { ProductId = id, Product = product });
         }
 
         // POST: Product/CreateOrUpdate/5

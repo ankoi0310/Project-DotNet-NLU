@@ -158,12 +158,12 @@ namespace OnlineGallery.Migrations
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("int");
 
+                    b.Property<string>("Address")
+                        .HasColumnType("nvarchar(MAX)")
+                        .HasColumnName("Address");
+
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Discriminator")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Email")
@@ -207,6 +207,10 @@ namespace OnlineGallery.Migrations
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("Status")
+                        .HasColumnType("bit")
+                        .HasColumnName("Status");
+
                     b.Property<bool>("TwoFactorEnabled")
                         .HasColumnType("bit");
 
@@ -225,8 +229,6 @@ namespace OnlineGallery.Migrations
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
                     b.ToTable("AspNetUsers");
-
-                    b.HasDiscriminator<string>("Discriminator").HasValue("ApplicationUser");
                 });
 
             modelBuilder.Entity("OnlineGallery.Models.Auction", b =>
@@ -255,8 +257,8 @@ namespace OnlineGallery.Migrations
                         .HasColumnType("int")
                         .HasColumnName("StartingPrice");
 
-                    b.Property<string>("Status")
-                        .HasColumnType("nvarchar(50)")
+                    b.Property<bool>("Status")
+                        .HasColumnType("bit")
                         .HasColumnName("Status");
 
                     b.Property<int?>("StepPrice")
@@ -266,7 +268,8 @@ namespace OnlineGallery.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ProductId");
+                    b.HasIndex("ProductId")
+                        .IsUnique();
 
                     b.ToTable("Auction");
                 });
@@ -293,12 +296,8 @@ namespace OnlineGallery.Migrations
                         .HasColumnName("BidPrice");
 
                     b.Property<DateTime?>("Day")
-                        .HasColumnType("date")
+                        .HasColumnType("datetime")
                         .HasColumnName("Day");
-
-                    b.Property<bool>("Qualified")
-                        .HasColumnType("bit")
-                        .HasColumnName("Qualified");
 
                     b.HasKey("Id", "AuctionId", "UserId");
 
@@ -307,6 +306,23 @@ namespace OnlineGallery.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("AuctionRecord");
+                });
+
+            modelBuilder.Entity("OnlineGallery.Models.Cart", b =>
+                {
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("UserId");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int")
+                        .HasColumnName("ProductId");
+
+                    b.HasKey("UserId", "ProductId");
+
+                    b.HasIndex("ProductId");
+
+                    b.ToTable("Cart");
                 });
 
             modelBuilder.Entity("OnlineGallery.Models.MyFavorites", b =>
@@ -425,11 +441,59 @@ namespace OnlineGallery.Migrations
                     b.ToTable("ProductImage");
                 });
 
-            modelBuilder.Entity("OnlineGallery.Models.User", b =>
+            modelBuilder.Entity("OnlineGallery.Models.Transaction", b =>
                 {
-                    b.HasBaseType("OnlineGallery.Areas.Identity.Data.ApplicationUser");
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("Id")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.HasDiscriminator().HasValue("User");
+                    b.Property<DateTime?>("CompletionDate")
+                        .HasColumnType("datetime")
+                        .HasColumnName("CompletionDate");
+
+                    b.Property<DateTime?>("CreateDate")
+                        .HasColumnType("datetime")
+                        .HasColumnName("CreateDate");
+
+                    b.Property<bool>("Status")
+                        .HasColumnType("bit")
+                        .HasColumnName("Status");
+
+                    b.Property<int>("TotalPrice")
+                        .HasColumnType("int")
+                        .HasColumnName("TotalPrice");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("UserId");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Transaction");
+                });
+
+            modelBuilder.Entity("OnlineGallery.Models.TransactionDetail", b =>
+                {
+                    b.Property<int>("TransactionId")
+                        .HasColumnType("int")
+                        .HasColumnName("TransactionId");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int")
+                        .HasColumnName("ProductId");
+
+                    b.Property<int>("Price")
+                        .HasColumnType("int");
+
+                    b.HasKey("TransactionId", "ProductId");
+
+                    b.HasIndex("ProductId");
+
+                    b.ToTable("TransactionDetail");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -486,8 +550,8 @@ namespace OnlineGallery.Migrations
             modelBuilder.Entity("OnlineGallery.Models.Auction", b =>
                 {
                     b.HasOne("OnlineGallery.Models.Product", "Product")
-                        .WithMany("Auctions")
-                        .HasForeignKey("ProductId")
+                        .WithOne("Auction")
+                        .HasForeignKey("OnlineGallery.Models.Auction", "ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -502,13 +566,32 @@ namespace OnlineGallery.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("OnlineGallery.Models.User", "User")
+                    b.HasOne("OnlineGallery.Areas.Identity.Data.ApplicationUser", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Auction");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("OnlineGallery.Models.Cart", b =>
+                {
+                    b.HasOne("OnlineGallery.Models.Product", "Product")
+                        .WithMany()
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("OnlineGallery.Areas.Identity.Data.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
 
                     b.Navigation("User");
                 });
@@ -521,7 +604,7 @@ namespace OnlineGallery.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("OnlineGallery.Models.User", "User")
+                    b.HasOne("OnlineGallery.Areas.Identity.Data.ApplicationUser", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -543,6 +626,34 @@ namespace OnlineGallery.Migrations
                     b.Navigation("Product");
                 });
 
+            modelBuilder.Entity("OnlineGallery.Models.Transaction", b =>
+                {
+                    b.HasOne("OnlineGallery.Areas.Identity.Data.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("OnlineGallery.Models.TransactionDetail", b =>
+                {
+                    b.HasOne("OnlineGallery.Models.Product", "Product")
+                        .WithMany()
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("OnlineGallery.Models.Transaction", "Transaction")
+                        .WithMany()
+                        .HasForeignKey("TransactionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+
+                    b.Navigation("Transaction");
+                });
+
             modelBuilder.Entity("OnlineGallery.Models.Auction", b =>
                 {
                     b.Navigation("AuctionRecords");
@@ -550,7 +661,7 @@ namespace OnlineGallery.Migrations
 
             modelBuilder.Entity("OnlineGallery.Models.Product", b =>
                 {
-                    b.Navigation("Auctions");
+                    b.Navigation("Auction");
                 });
 #pragma warning restore 612, 618
         }

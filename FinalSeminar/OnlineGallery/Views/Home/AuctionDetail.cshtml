@@ -1,15 +1,25 @@
-﻿@using OnlineGallery.Data
+﻿@using Microsoft.EntityFrameworkCore;
+@using OnlineGallery.Areas.Identity.Data;
+@using Microsoft.AspNetCore.Identity;
+@using OnlineGallery.Data
 
 @inject ApplicationDbContext context
+@inject UserManager<ApplicationUser> userManager
 
 @model OnlineGallery.Models.Auction
 
 @{
-    ViewData["Title"] = "Product Detail";
+    ViewData["Title"] = "Auction Detail";
 
-    var imageList = Tools.GetProductImages(context, Model.Id);
+    var imageList = Tools.GetProductImages(context, Model.Product.Id);
 
-    var product = context.Products.Find(Model.ProductId);
+    var user = await userManager.GetUserAsync(User);
+
+    var lastBidPrice = context.AuctionRecords.Any(e => e.AuctionId.Equals(Model.Id)) ? Model.AuctionRecords.Select(e => e.BidPrice).Last() : Model.StartingPrice;
+    
+    var totalBidders = await context.AuctionRecords.Select(e => e.UserId).Distinct().CountAsync();
+    var totalWatchings = await context.MyFavorites.Where(e => e.ProductId == Model.ProductId).CountAsync();
+    var totalBids = await context.AuctionRecords.Where(e => e.AuctionId == Model.Id).CountAsync();
 }
 
 <!--============= Hero Section Starts Here =============-->
@@ -67,34 +77,54 @@
             <div class="col-lg-8">
                 <div class="product-details-content">
                     <div class="product-details-header">
-                        <h2 class="title">@Model.Product.Name</h2>
+                        <h3 class="title">@Model.Product.Name</h3>
                         <ul>
                             <li>Listing ID: @Model.Id</li>
-                            <li>Item #: @Model.ProductId</li>
+                            <li>Item #: @Model.Product.Id</li>
                         </ul>
                     </div>
                     <ul class="price-table mb-30">
                         <li class="header">
                             <h5 class="current">Current Price</h5>
-                            <h3 class="price"></h3>
+                            <h3 class="price">@lastBidPrice.Value.ToString("C")</h3>
                         </li>
                         <li>
                             <span class="details">Bid Increment (US)</span>
-                            <h5 class="info">$50.00</h5>
+                            <h5 class="info">@Model.StepPrice.Value.ToString("C")</h5>
                         </li>
                     </ul>
                     <div class="product-bid-area">
-                        <form class="product-bid-form">
-                            <div class="search-icon">
-                                <img src="~/assets/images/product/search-icon.png" alt="product">
-                            </div>
-                            <input type="text" placeholder="Enter you bid amount">
-                            <button type="submit" class="custom-button">Submit a bid</button>
-                        </form>
+                        @if (User.Identity.IsAuthenticated)
+                        {
+                            <form action="@Url.Content("~/Home/Bidding/")" method="post" class="product-bid-form" onsubmit="return bidding(this);">
+                                <div class="search-icon">
+                                    <img src="~/assets/images/product/search-icon.png" alt="product">
+                                </div>
+                                <input type="hidden" name="auctionId" value="@Model.Id" />
+                                <input type="text" name="bidPrice" placeholder="Enter you bid amount" />
+                                <button type="submit" class="custom-button">Submit a bid</button>
+                            </form>
+                        }
                     </div>
                     <div class="buy-now-area">
                         <a href="#0" class="custom-button">Buy Now: @Model.Product.DefaultPrice.Value.ToString("C")</a>
-                        <a href="#0" class="rating custom-button active border"><i class="fas fa-star"></i> Add to Favorites</a>
+                        <a href="~/Home/AddOrRemoveFavorites/@Model.Product.Id" id="like-detail-@(Model.Product.Id)" onclick="return jQueryAjaxFavorites('@Url.Action("AddOrRemoveFavorites", "Home", new { Model.Product.Id }, Context.Request.Scheme)');" class="rating custom-button active border">
+                            @if (user != null)
+                            {
+                                @if (Tools.IsMyFavorites(context, user.Id, Model.Product.Id))
+                                {
+                                    <span><i class="fas fa-star"></i>&nbsp;You have liked this</span>
+                                }
+                                else
+                                {
+                                    <span><i class="far fa-star"></i>&nbsp;Add to your favorites</span>
+                                }
+                            }
+                            else
+                            {
+                                <span><i class="far fa-star"></i>&nbsp;Add to your favorites</span>
+                            }
+                        </a>
                         <div class="share-area">
                             <span>Share to:</span>
                             <ul>
@@ -118,17 +148,27 @@
             <div class="col-lg-4">
                 <div class="product-sidebar-area">
                     <div class="product-single-sidebar mb-3">
-                        <h6 class="title">This Auction Ends in:</h6>
-                        <div class="countdown">
-                            <div id="bid_counter1"></div>
-                        </div>
+                        @if (Model.StartDay.Value.CompareTo(DateTime.Now) > 0)
+                        {
+                            <h6 class="title">This Auction Start in:</h6>
+                            <div class="countdown">
+                                <div id="counter@(Model.Id)" data-countdown="@Model.StartDay.Value.ToString("MM/dd/yyyy")"></div>
+                            </div>
+                        }
+                        else
+                        {
+                            <h6 class="title">This Auction Ends in:</h6>
+                            <div class="countdown">
+                                <div id="counter@(Model.Id)" data-countdown="@Model.ClosingDay.Value.ToString("MM/dd/yyyy")"></div>
+                            </div>
+                        }
                         <div class="side-counter-area">
                             <div class="side-counter-item">
                                 <div class="thumb">
                                     <img src="~/assets/images/product/icon1.png" alt="product">
                                 </div>
                                 <div class="content">
-                                    <h3 class="count-title"><span class="counter">61</span></h3>
+                                    <h3 class="count-title"><span class="counter">@totalBidders</span></h3>
                                     <p>Active Bidders</p>
                                 </div>
                             </div>
@@ -137,7 +177,7 @@
                                     <img src="~/assets/images/product/icon2.png" alt="product">
                                 </div>
                                 <div class="content">
-                                    <h3 class="count-title"><span class="counter">203</span></h3>
+                                    <h3 class="count-title"><span class="counter">@totalWatchings</span></h3>
                                     <p>Watching</p>
                                 </div>
                             </div>
@@ -146,7 +186,7 @@
                                     <img src="~/assets/images/product/icon3.png" alt="product">
                                 </div>
                                 <div class="content">
-                                    <h3 class="count-title"><span class="counter">82</span></h3>
+                                    <h3 class="count-title"><span class="counter">@totalBids</span></h3>
                                     <p>Total Bids</p>
                                 </div>
                             </div>
@@ -260,81 +300,27 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr>
-                                        <td data-history="bidder">
-                                            <div class="user-info">
-                                                <div class="thumb">
-                                                    <img src="~/assets/images/history/01.png" alt="history">
-                                                </div>
-                                                <div class="content">
-                                                    Moses Watts
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td data-history="date">06/16/2021</td>
-                                        <td data-history="time">02:45:25 PM</td>
-                                        <td data-history="unit price">$900.00</td>
-                                    </tr>
-                                    <tr>
-                                        <td data-history="bidder">
-                                            <div class="user-info">
-                                                <div class="thumb">
-                                                    <img src="~/assets/images/history/02.png" alt="history">
-                                                </div>
-                                                <div class="content">
-                                                    Pat Powell
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td data-history="date">06/16/2021</td>
-                                        <td data-history="time">02:45:25 PM</td>
-                                        <td data-history="unit price">$900.00</td>
-                                    </tr>
-                                    <tr>
-                                        <td data-history="bidder">
-                                            <div class="user-info">
-                                                <div class="thumb">
-                                                    <img src="~/assets/images/history/03.png" alt="history">
-                                                </div>
-                                                <div class="content">
-                                                    Jack Rodgers
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td data-history="date">06/16/2021</td>
-                                        <td data-history="time">02:45:25 PM</td>
-                                        <td data-history="unit price">$900.00</td>
-                                    </tr>
-                                    <tr>
-                                        <td data-history="bidder">
-                                            <div class="user-info">
-                                                <div class="thumb">
-                                                    <img src="~/assets/images/history/04.png" alt="history">
-                                                </div>
-                                                <div class="content">
-                                                    Arlene Paul
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td data-history="date">06/16/2021</td>
-                                        <td data-history="time">02:45:25 PM</td>
-                                        <td data-history="unit price">$900.00</td>
-                                    </tr>
-                                    <tr>
-                                        <td data-history="bidder">
-                                            <div class="user-info">
-                                                <div class="thumb">
-                                                    <img src="~/assets/images/history/05.png" alt="history">
-                                                </div>
-                                                <div class="content">
-                                                    Marcia Clarke
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td data-history="date">06/16/2021</td>
-                                        <td data-history="time">02:45:25 PM</td>
-                                        <td data-history="unit price">$900.00</td>
-                                    </tr>
+                                    @{
+                                        var records = await context.AuctionRecords.Take(5).ToListAsync();
+                                        foreach (var item in records)
+                                        {
+                                            <tr>
+                                                <td data-history="bidder">
+                                                    <div class="user-info">
+                                                        <div class="thumb">
+                                                            <img src="~/assets/images/history/01.png" alt="history">
+                                                        </div>
+                                                        <div class="content">
+                                                            Moses Watts
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td data-history="date">06/16/2021</td>
+                                                <td data-history="time">02:45:25 PM</td>
+                                                <td data-history="unit price">$900.00</td>
+                                            </tr>
+                                        }
+                                    }
                                 </tbody>
                             </table>
                             <div class="text-center mb-3 mt-4">

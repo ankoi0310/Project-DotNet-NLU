@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using OnlineGallery.Data;
 using OnlineGallery.Models;
@@ -9,6 +10,7 @@ using System.Threading.Tasks;
 
 namespace OnlineGallery.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class AuctionController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -18,15 +20,9 @@ namespace OnlineGallery.Controllers
             _context = context;
         }
 
-        public IActionResult Index()
-        {
-            return View();
-        }
-
         // GET: Auction/List
-        public async Task<IActionResult> List()
+        public async Task<IActionResult> Index()
         {
-            await _context.Products.ToListAsync();
             return View(await _context.Auctions.ToListAsync());
         }
 
@@ -50,6 +46,14 @@ namespace OnlineGallery.Controllers
             }
         }
 
+        // GET: Auction/CreateAuction/5
+        [NoDirectAccess]
+        public async Task<IActionResult> CreateAuction(int id)
+        {
+            var product = await _context.Products.FindAsync(id);
+            return View(new Auction() { ProductId = id, Product = product });
+        }
+
         // POST: Auction/CreateOrUpdate/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
@@ -57,6 +61,7 @@ namespace OnlineGallery.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateOrUpdate(int id, Auction auction)
         {
+            
             if (auction.StartDay.Value.CompareTo(DateTime.Now) < 0)
             {
                 ModelState.AddModelError("DateError", "- The starting day cannot be earlier than today.");

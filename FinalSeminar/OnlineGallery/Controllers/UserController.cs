@@ -1,5 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using OnlineGallery.Areas.Identity.Data;
 using OnlineGallery.Data;
 using System;
 using System.Collections.Generic;
@@ -8,136 +11,41 @@ using System.Threading.Tasks;
 
 namespace OnlineGallery.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class UserController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public UserController(ApplicationDbContext context)
+        public UserController(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
         {
             _context = context;
-        }
-
-        public IActionResult Index()
-        {
-            return View();
+            _userManager = userManager;
         }
 
         // GET: User
-        public async Task<IActionResult> List()
+        public async Task<IActionResult> Index()
         {
             return View(await _context.Users.ToListAsync());
         }
 
-        //// GET: User/AddOrEdit
-        //// GET: User/AddOrEdit/5
-        //[NoDirectAccess]
-        //public async Task<IActionResult> AddOrEdit(int id = 0)
-        //{
-        //    if (id == 0)
-        //    {
-        //        return base.View(new User());
-        //    }
-        //    else
-        //    {
-        //        var user = await _context.Users.FindAsync(id);
-        //        if (user == null)
-        //        {
-        //            return NotFound();
-        //        }
-        //        return View(user);
-        //    }
-        //}
-
-        //// POST: User/AddOrEdit/5
-        //// To protect from overposting attacks, enable the specific properties you want to bind to.
-        //// For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        //[HttpPost]
-        //[ValidateAntiForgeryToken]
-        //public async Task<IActionResult> AddOrEdit(int id, [Bind("Id,Username,Password,UsertypeId,Active")] User user)
-        //{
-        //    if (ModelState.IsValid)
-        //    {
-        //        if (id == 0)
-        //        {
-        //            user.Password = Tools.Encrypt(user.Password);
-        //            _context.Add(user);
-        //            await _context.SaveChangesAsync();
-        //            if (user.UsertypeId == 3)
-        //            {
-        //                _context.Add(new Customer() { UserId = user.Id, Active = true });
-        //            }
-        //            if (user.UsertypeId == 2)
-        //            {
-        //                _context.Add(new Artist() { UserId = user.Id, Active = true });
-        //            }
-        //            await _context.SaveChangesAsync();
-        //        }
-        //        else
-        //        {
-        //            try
-        //            {
-        //                user.Password = Tools.Encrypt(user.Password);
-        //                if (user.UsertypeId == 3)
-        //                {
-        //                    Customer customer = Tools.GetCustomerFromUser(user.Id);
-        //                    customer.Active = user.Active;
-        //                    _context.Update(customer);
-        //                }
-        //                if (user.UsertypeId == 2)
-        //                {
-        //                    Artist artist = Tools.GetArtistFromUser(user.Id);
-        //                    artist.Active = user.Active;
-        //                    _context.Update(artist);
-        //                }
-        //                _context.Update(user);
-        //                await _context.SaveChangesAsync();
-        //            }
-        //            catch (DbUpdateConcurrencyException)
-        //            {
-        //                if (!UserExists(user.Id))
-        //                {
-        //                    return NotFound();
-        //                }
-        //                else
-        //                {
-        //                    throw;
-        //                }
-        //            }
-        //        }
-        //        return Json(new { isValid = true, html = Helper.RenderRazorViewString(this, "_ViewAll", _context.Users.ToList()) });
-        //    }
-        //    return Json(new { isValid = false, html = Helper.RenderRazorViewString(this, "AddOrEdit", user) });
-        //}
-
-        //// POST: User/Delete/5
-        //[HttpPost, ActionName("Delete")]
-        //[ValidateAntiForgeryToken]
-        //public async Task<IActionResult> DeleteConfirmed(int id)
-        //{
-        //    var user = await _context.Users.FindAsync(id);
-        //    if (user.UsertypeId == 3)
-        //    {
-        //        Customer customer = Tools.GetCustomerFromUser(user.Id);
-        //        customer.Active = false;
-        //        _context.Update(customer);
-        //        await _context.SaveChangesAsync();
-        //    }
-        //    if (user.UsertypeId == 2)
-        //    {
-        //        Artist artist = Tools.GetArtistFromUser(user.Id);
-        //        artist.Active = false;
-        //        _context.Update(artist);
-        //        await _context.SaveChangesAsync();
-        //    }
-        //    user.Active = false;
-        //    _context.Update(user);
-        //    await _context.SaveChangesAsync();
-        //    return Json(new { html = Helper.RenderRazorViewString(this, "_ViewAll", _context.Users.ToList()) });
-        //}
-
-        //private bool UserExists(int id)
-        //{
-        //    return _context.Users.Any(e => e.Id == id);
-        //}
+        // post: user/delete/5
+        [HttpPost, ActionName("Lockout")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> LockoutConfirmed(string id)
+        {
+            var user = await _userManager.FindByIdAsync(id);
+            if (user.Status)
+            {
+                user.Status = false;
+                await _userManager.SetLockoutEndDateAsync(user, DateTime.Now.AddYears(10));
+            }
+            else
+            {
+                user.Status = true;
+                await _userManager.SetLockoutEndDateAsync(user, DateTime.Now);
+            }
+            return Json(new { html = Helper.RenderRazorViewString(this, "_ViewAll", await _context.Users.ToListAsync()) });
+        }
     }
 }

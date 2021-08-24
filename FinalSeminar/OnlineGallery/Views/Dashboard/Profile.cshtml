@@ -1,7 +1,14 @@
-﻿@{
+﻿@using OnlineGallery.Areas.Identity.Data
+@using Microsoft.AspNetCore.Identity
+
+@inject UserManager<ApplicationUser> userManager
+
+@{
     ViewData["Title"] = "Profile";
     ViewData["Profile"] = "active";
     Layout = "~/Views/Shared/_DashboardLayout.cshtml";
+
+    var user = await userManager.GetUserAsync(Context.User);
 }
 
 <div class="row">
@@ -9,84 +16,66 @@
         <div class="dash-pro-item mb-30 dashboard-widget">
             <div class="header">
                 <h4 class="title">Personal Details</h4>
-                <span class="edit"><i class="flaticon-edit"></i> Edit</span>
+                <a onclick="showInPopup('@Url.Action("EditProfile", "Dashboard", new { user.Id }, Context.Request.Scheme)', 'Edit Profile')"><span class="edit"><i class="flaticon-edit"></i> Edit</span></a>
             </div>
+            @if (!user.EmailConfirmed)
+            {
+                <label class="text-danger">Please check email to confirm your account</label>
+            }
+            @if (!user.PhoneNumberConfirmed && user.PhoneNumber != null)
+            {
+                <label class="text-danger">Your phone number has not been confirmed</label>
+            }
             <ul class="dash-pro-body">
                 <li>
                     <div class="info-name">Name</div>
-                    <div class="info-value">Albert Owens</div>
+                    <div class="info-value">@user.FullName</div>
                 </li>
                 <li>
-                    <div class="info-name">Date of Birth</div>
-                    <div class="info-value">15-03-1974</div>
+                    <div class="info-name">Email</div>
+                    <div class="info-value">
+                        @if (user.EmailConfirmed)
+                        {
+                            <span>@user.Email&nbsp;<i class="text-success fas fa-check-circle"></i></span>
+                        }
+                        else
+                        {
+                            <span>@user.Email&nbsp; (Not confirm yet)</span>
+                        }
+                    </div>
+                </li>
+                <li>
+                    <div class="info-name">Mobile</div>
+                    @if (user.PhoneNumber != null)
+                    {
+                        if (user.PhoneNumberConfirmed)
+                        {
+                            <div class="info-value">
+                                <span>@user.PhoneNumber&nbsp;<i class="text-success fas fa-check-circle"></i></span>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="info-value">
+                                <span>@user.PhoneNumber&nbsp; (Not confirm yet)</span>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="info-value">None</div>
+                    }
                 </li>
                 <li>
                     <div class="info-name">Address</div>
-                    <div class="info-value">8198 Fieldstone Dr.La Crosse, WI 54601</div>
-                </li>
-            </ul>
-        </div>
-    </div>
-    <div class="col-12">
-        <div class="dash-pro-item mb-30 dashboard-widget">
-            <div class="header">
-                <h4 class="title">Account Settings</h4>
-                <span class="edit"><i class="flaticon-edit"></i> Edit</span>
-            </div>
-            <ul class="dash-pro-body">
-                <li>
-                    <div class="info-name">Language</div>
-                    <div class="info-value">English (United States)</div>
-                </li>
-                <li>
-                    <div class="info-name">Time Zone</div>
-                    <div class="info-value">(GMT-06:00) Central America</div>
-                </li>
-                <li>
-                    <div class="info-name">Status</div>
-                    <div class="info-value"><i class="flaticon-check text-success"></i> Active</div>
-                </li>
-            </ul>
-        </div>
-    </div>
-    <div class="col-12">
-        <div class="dash-pro-item mb-30 dashboard-widget">
-            <div class="header">
-                <h4 class="title">Email Address</h4>
-                <span class="edit"><i class="flaticon-edit"></i> Edit</span>
-            </div>
-            <ul class="dash-pro-body">
-                <li>
-                    <div class="info-name">Email</div>
-                    <div class="info-value"><a href="http://pixner.net/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="aecfc2cccbdcda9d9a97eec9c3cfc7c280cdc1c3">[email&#160;protected]</a></div>
-                </li>
-            </ul>
-        </div>
-    </div>
-    <div class="col-12">
-        <div class="dash-pro-item mb-30 dashboard-widget">
-            <div class="header">
-                <h4 class="title">Phone</h4>
-                <span class="edit"><i class="flaticon-edit"></i> Edit</span>
-            </div>
-            <ul class="dash-pro-body">
-                <li>
-                    <div class="info-name">Mobile</div>
-                    <div class="info-value">+1 234-567-8925</div>
-                </li>
-            </ul>
-        </div>
-    </div>
-    <div class="col-12">
-        <div class="dash-pro-item dashboard-widget">
-            <div class="header">
-                <h4 class="title">Security</h4>
-                <span class="edit"><i class="flaticon-edit"></i> Edit</span>
-            </div>
-            <ul class="dash-pro-body">
-                <li>
-                    <div class="info-name">Password</div>
-                    <div class="info-value">xxxxxxxxxxxxxxxx</div>
+                    @if (user.Address != null)
+                    {
+                        <div class="info-value">@user.Address</div>
+                    }
+                    else
+                    {
+                        <div class="info-value">None</div>
+                    }
                 </li>
             </ul>
         </div>

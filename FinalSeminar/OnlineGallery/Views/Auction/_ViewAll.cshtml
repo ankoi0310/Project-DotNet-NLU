@@ -1,28 +1,30 @@
-﻿@model IEnumerable<OnlineGallery.Models.Auction>
+﻿@using OnlineGallery.Data;
+@using Microsoft.EntityFrameworkCore;
+
+@inject ApplicationDbContext context
+
+@model IEnumerable<OnlineGallery.Models.Auction>
 
 @{
     ViewBag.Count = 0;
+
 }
 
 <div class="row">
     <div class="col-12">
         <div class="card">
             <div class="card-body">
-                <table id="product" class="table table-bordered table-striped">
+                <table id="auction" class="table table-bordered table-striped">
                     <thead>
                         <tr>
                             <th class="align-middle text-center">
                                 No.
                             </th>
                             <th class="align-middle text-center">
-                                @Html.DisplayNameFor(item => item.Product.Name)
+                                @Html.DisplayNameFor(item => item.ProductId)
                             </th>
-                            <th class="align-middle text-center">
-                                @Html.DisplayNameFor(item => item.StartDay)
-                            </th>
-                            <th class="align-middle text-center">
-                                @Html.DisplayNameFor(item => item.ClosingDay)
-                            </th>
+                            <th class="align-middle text-center">Start Day</th>
+                            <th class="align-middle text-center">Closing Day</th>
                             <th class="align-middle text-center">
                                 @Html.DisplayNameFor(item => item.StartingPrice)
                             </th>
@@ -40,32 +42,47 @@
                     <tbody>
                         @foreach (var item in Model)
                         {
+                            var product = await context.Products.FindAsync(item.ProductId);
                             ViewBag.Count++;
                             <tr>
-                                <td>
+                                <td class="align-middle text-center">
                                     @ViewBag.Count
                                 </td>
-                                <td>
-                                    @item.Product.Name
+                                <td class="align-middle">
+                                    @product.Name
                                 </td>
-                                <td>
-                                    @item.StartDay
+                                <td class="align-middle text-center">
+                                    @item.StartDay.Value.ToString("HH:mm dd/MM/yyyy")
                                 </td>
-                                <td>
-                                    @item.ClosingDay
+                                <td class="align-middle text-center">
+                                    @item.ClosingDay.Value.ToString("HH:mm dd/MM/yyyy")
                                 </td>
-                                <td>
-                                    @item.StartingPrice
+                                <td class="align-middle text-center">
+                                    @item.StartingPrice.Value.ToString("C")
                                 </td>
-                                <td>
-                                    @item.StepPrice
+                                <td class="align-middle text-center">
+                                    @item.StepPrice.Value.ToString("C")
                                 </td>
-                                <td>
-                                    @item.Status
+                                <td class="align-middle text-center">
+                                    @if (item.Status)
+                                    {
+                                        <span class="font-weight-bolder text-success">On process</span>
+                                    }
+                                    else
+                                    {
+                                        if (item.StartDay.Value.CompareTo(DateTime.Now) > 0)
+                                        {
+                                            <span class="font-weight-bolder text-secondary">Not started yet</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="font-weight-bolder text-danger">Closed</span>
+                                        }
+                                    }
                                 </td>
-                                <td>
+                                <td class="align-middle text-center">
                                     <a onclick="showInPopup('@Url.Action("CreateOrUpdate", "Auction", new { item.Id }, Context.Request.Scheme)', 'Update Auction')" class="btn btn-info">@*<i class="fas fa-pencil-alt"></i>*@ Edit</a>
-                                    
+
                                     <form asp-action="Delete" asp-route-id="@item.Id" onsubmit="return jQueryAjaxSoldConfirm(this);" class="d-inline">
                                         <input type="submit" value="Delete" class="btn btn-warning" />
                                     </form>

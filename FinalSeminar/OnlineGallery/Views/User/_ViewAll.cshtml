@@ -1,4 +1,10 @@
-﻿@model IEnumerable<OnlineGallery.Areas.Identity.Data.ApplicationUser>
+﻿@using Microsoft.EntityFrameworkCore;
+@using Microsoft.AspNetCore.Identity;
+@using OnlineGallery.Areas.Identity.Data
+
+@inject UserManager<ApplicationUser> userManager
+
+@model IEnumerable<OnlineGallery.Areas.Identity.Data.ApplicationUser>
 
 <div class="row">
     <div class="col-12">
@@ -14,16 +20,13 @@
                                 Full Name
                             </th>
                             <th class="align-middle text-center">
-                                Email
+                                Address
                             </th>
                             <th class="align-middle text-center">
                                 Phone Number
                             </th>
                             <th class="align-middle text-center">
-                                Email Confirmed
-                            </th>
-                            <th class="align-middle text-center">
-                                Phone Number Confirmed
+                                Email
                             </th>
                             <th class="align-middle text-center">
                                 Role
@@ -37,35 +40,67 @@
                     <tbody>
                         @foreach (var item in Model)
                         {
+                            var roles = await userManager.GetRolesAsync(item);
                             <tr>
-                                <td>
-                                    @item.Id
+                                <td class="align-middle">
+                                    <span>@item.Id</span>
                                 </td>
-                                <td>
-                                    @item.FullName
+                                <td class="align-middle">
+                                    <span>@item.FullName</span>
+</td>
+                                <td class="align-middle">
+                                    <span>@item.Address</span>
+</td>
+                                <td class="align-middle text-center">
+                                    <span>@item.PhoneNumber</span>
+</td>
+                                <td class="align-middle">
+                                    @if (item.EmailConfirmed)
+                                    {
+                                        <span>@item.Email&nbsp;<i class="text-success fas fa-check-circle"></i></span>
+                                    }
+                                    else
+                                    {
+                                        <span>@item.Email&nbsp;<i class="text-danger fas fa-exclamation-circle"></i></span>
+                                    }
                                 </td>
-                                <td>
-                                    @item.Email
+                                <td class="align-middle text-center">
+                                    @foreach (var role in roles)
+                                    {
+                                        if (role.Equals("Admin"))
+                                        {
+                                            <span class="font-weight-bolder text-success">@role</span><br />
+                                        }
+                                        else
+                                        {
+                                            <span class="font-weight-bolder text-primary">@role</span><br />
+                                        }
+                                    }
                                 </td>
-                                <td>
-                                    @item.PhoneNumber
+                                <td class="align-middle text-center">
+                                    @if (item.Status)
+                                    {
+                                        <span class="font-weight-bolder text-success">Activating</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="font-weight-bolder text-danger">Locked</span>
+                                    }
                                 </td>
-                                <td>
-                                    @item.EmailConfirmed
-                                </td>
-                                <td>
-                                    @item.PhoneNumberConfirmed
-                                </td>
-                                <td>
-
-                                </td>
-                                <td>
-
-                                </td>
-                                <td>
-                                    <form asp-action="Delete" asp-route-id="@item.Id" onsubmit="return jQueryAjaxDelete(this);" class="d-inline">
-                                        <input type="submit" value="Delete" class="btn btn-danger" />
-                                    </form>
+                                <td class="align-middle text-center">
+                                    @if (roles.Contains("User"))
+                                    {
+                                        <form asp-action="Lockout" asp-route-id="@item.Id" onsubmit="return lockoutUser(this);" class="d-inline">
+                                            @if (item.Status)
+                                            {
+                                                <input type="submit" value="Lockout" class="font-weight-bolder btn btn-danger" />
+                                            }
+                                            else
+                                            {
+                                                <input type="submit" value="Unlockout" class="font-weight-bolder btn btn-success" />
+                                            }
+                                        </form>
+                                    }
                                 </td>
                             </tr>
                         }

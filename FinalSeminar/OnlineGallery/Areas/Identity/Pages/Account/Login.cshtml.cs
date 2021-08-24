@@ -72,9 +72,8 @@ namespace OnlineGallery.Areas.Identity.Pages.Account
             ReturnUrl = returnUrl;
         }
 
-        public async Task<IActionResult> OnPostAsync(string returnUrl = null)
+        public async Task<IActionResult> OnPostAsync()
         {
-            returnUrl ??= Url.Content("~/");
 
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
         
@@ -82,20 +81,33 @@ namespace OnlineGallery.Areas.Identity.Pages.Account
             {
                 // This doesn't count login failures towards account lockout
                 // To enable password failures to trigger account lockout, set lockoutOnFailure: true
-                var result = await _signInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false);
+                var result = await _signInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: true);
+                var user = await _userManager.FindByEmailAsync(Input.Email);
                 if (result.Succeeded)
                 {
+                    var roles = await _userManager.GetRolesAsync(user);
+                    string returnUrl = roles.Contains("Admin") ? Url.Content("~/Admin") : Url.Content("~/Home");
                     _logger.LogInformation("User logged in.");
                     return LocalRedirect(returnUrl);
+                }
+
+                if (result.IsLockedOut)
+                {
+                    if (!user.Status)
+                    {
+                        _logger.LogWarning("User account locked out.");
+                        ModelState.AddModelError("", "Your account is locked out. Please contact support for help.");
+                        return Page();
+                    }
+                    var forgotPassLink = Url.Action("ForgotPassword", "Account", new { }, Request.Scheme);
+
+                    _logger.LogWarning("User account locked out.");
+                    ModelState.AddModelError("", "Your account is locked out. Please try again after 2 minutes.");
+                    return Page();
                 }
                 //if (result.RequiresTwoFactor)
                 //{
                 //    return RedirectToPage("./LoginWith2fa", new { ReturnUrl = returnUrl, RememberMe = Input.RememberMe });
-                //}
-                //if (result.IsLockedOut)
-                //{
-                //    _logger.LogWarning("User account locked out.");
-                //    return RedirectToPage("./Lockout");
                 //}
                 else
                 {

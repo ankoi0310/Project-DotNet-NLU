@@ -17,7 +17,7 @@ namespace OnlineGallery.Models
         [Column("Id", TypeName = "int")]
         public int Id { get; set; }
 
-        [DisplayName("Product")]
+        [DisplayName("Product Name")]
         [Column("ProductId", TypeName = "int")]
         [Required(ErrorMessage = "- Please select product.")]
         public int? ProductId { get; set; }
@@ -46,8 +46,8 @@ namespace OnlineGallery.Models
         [Column("StepPrice", TypeName = "int")]
         public int? StepPrice { get; set; }
 
-        [Column("Status", TypeName = "nvarchar(50)")]
-        public string Status { get; set; }
+        [Column("Status", TypeName = "bit")]
+        public bool Status { get; set; }
 
         public List<AuctionRecord> AuctionRecords { get; set; }
     }

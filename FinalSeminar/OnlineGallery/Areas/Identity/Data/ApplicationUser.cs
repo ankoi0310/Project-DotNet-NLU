@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
@@ -20,5 +21,13 @@ namespace OnlineGallery.Areas.Identity.Data
         public string Image { get; set; }
         [NotMapped]
         public IFormFile FileImage { get; set; }
+
+        [PersonalData]
+        [Column("Address", TypeName = "nvarchar(MAX)")]
+        public string Address { get; set; }
+
+        [PersonalData]
+        [Column("Status", TypeName = "bit")]
+        public bool Status { get; set; }
     }
 }

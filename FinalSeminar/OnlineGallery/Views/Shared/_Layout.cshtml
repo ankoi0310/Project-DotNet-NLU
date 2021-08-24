@@ -1,5 +1,4 @@
 ﻿<!DOCTYPE html>
-
 <html>
 @await Html.PartialAsync("~/Views/PartialView/Head.cshtml")
 <body>
@@ -9,9 +8,6 @@
     <!--============= Header Section Starts Here =============-->
     @await Html.PartialAsync("~/Views/PartialView/Header.cshtml")
     <!--============= Header Section Ends Here =============-->
-    <!--============= Cart Section Starts Here =============-->
-    @await Html.PartialAsync("~/Views/PartialView/Cart.cshtml")
-    <!--============= Cart Section Ends Here =============-->
     @RenderBody()
     <div class="modal" tabindex="-1" id="form-modal">
         <div class="modal-dialog">

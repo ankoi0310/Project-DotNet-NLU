@@ -1,13 +1,37 @@
-﻿<div class="user">
+﻿@using OnlineGallery.Areas.Identity.Data
+@using Microsoft.AspNetCore.Identity
+@using OnlineGallery.Data
+
+@inject UserManager<ApplicationUser> userManager
+
+@{
+    var user = await userManager.GetUserAsync(Context.User);
+}
+
+<div class="user">
     <div class="thumb-area">
         <div class="thumb">
-            <img src="~/assets/images/dashboard/user.png" alt="user">
+            @if (user.Image != null)
+            {
+                <img src="~/images/@user.Image" alt="user">
+            }
+            else
+            {
+                <img src="~/images/blank-avatar.jpg" alt="user">
+            }
         </div>
-        <label for="profile-pic" class="profile-pic-edit"><i class="flaticon-pencil"></i></label>
-        <input type="file" id="profile-pic" class="d-none">
+        <label asp-for="@user.FileImage" class="profile-pic-edit"><i class="flaticon-pencil"></i></label>
+        <form asp-action="SetImage" id="formImage" enctype="multipart/form-data">
+            <input asp-for="@user.FileImage" class="d-none" accept="image/*">
+        </form>
     </div>
     <div class="content">
-        <h5 class="title"><a href="#0">Percy Reed</a></h5>
-        <span class="username"><a href="http://pixner.net/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="402a2f282e00272d21292c6e232f2d">[email&#160;protected]</a></span>
+        <h5 class="title">@user.FullName</h5>
     </div>
 </div>
+
+<script>
+    document.getElementById('user_FileImage').onchange = function () {
+        document.getElementById('formImage').submit();
+    }
+</script>

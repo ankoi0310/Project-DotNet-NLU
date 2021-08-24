@@ -1,0 +1,83 @@
+﻿@model IEnumerable<OnlineGallery.Models.Product>
+
+@{
+    ViewData["Title"] = "Cart";
+
+    int count = 0;
+}
+
+<!--============= Hero Section Starts Here =============-->
+<div class="hero-section">
+    <div class="container">
+        <ul class="breadcrumb">
+            <li>
+                <a href="~/">Home</a>
+            </li>
+            <li>
+                <span>Contact Us</span>
+            </li>
+        </ul>
+    </div>
+    <div class="bg_img hero-bg bottom_center" data-background="@Url.Content("~/assets/images/banner/hero-bg.png")"></div>
+</div>
+<!--============= Hero Section Ends Here =============-->
+<!--============= Contact Section Starts Here =============-->
+<section class="contact-section padding-bottom">
+    <div class="container">
+        <div class="contact-wrapper padding-top padding-bottom mt--100 mt-lg--440">
+            <div class="section-header">
+                <h2 class="title">Products In Cart</h2>
+            </div>
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <table class="table table-bordered table-striped" style="table-layout: fixed;">
+                                <thead>
+                                    <tr>
+                                        <th class="align-middle text-center">
+                                            No.
+                                        </th>
+                                        <th class="align-middle text-center">
+                                            @Html.DisplayNameFor(item => item.Name)
+                                        </th>
+                                        <th class="align-middle text-center">
+                                            @Html.DisplayNameFor(item => item.DefaultPrice)
+                                        </th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="cart-body">
+                                    @if (Model.ToList().Count != 0)
+                                    {
+                                        foreach (var item in Model)
+                                        {
+                                            count++;
+                                            <tr>
+                                                <td class="align-middle text-center">@count</td>
+                                                <td class="align-middle">@item.Name</td>
+                                                <td class="align-middle">@item.DefaultPrice.Value.ToString("C")</td>
+                                                <td>
+                                                    <button onclick="return removeFromCart('@Url.Action("RemoveFromCart", "Home", new { item.Id }, Context.Request.Scheme)')" class="remove-cart text-danger">Remove</button>
+                                                </td>
+                                            </tr>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <tr>
+                                            <td colspan="4" class="align-middle text-center">No data available in table</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                        <!-- /.card-body -->
+                    </div>
+                    <!-- /.card -->
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!--============= Contact Section Ends Here =============-->

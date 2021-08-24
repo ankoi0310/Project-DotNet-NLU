@@ -11,6 +11,7 @@
 <div class="row">
     <div class="col-md-12">
         <ul class="font-weight-bolder" style="list-style: none;">
+            <li><span class="text-danger">@Html.ValidationMessage("Existed")</span></li>
             <li><span asp-validation-for="ProductId" class="text-danger"></span></li>
             <li><span class="text-danger">@Html.ValidationMessage("Image")</span></li>
             <li><span class="text-danger">@Html.ValidationMessage("DateError")</span></li>
@@ -40,7 +41,7 @@
                         {
                             <select class="form-select form-control" aria-label="Select Product" asp-for="ProductId">
                                 <option value="">Select product</option>
-                                @foreach (var item in Tools.GetProductIdHaveGallery(context))
+                                @foreach (var item in Tools.GetProductNotAuctioned(context))
                                 {
                                     <option value="@item.Id">@item.Name</option>
                                 }
@@ -51,7 +52,14 @@
                 <div class="col-3">
                     <div class="form-group">
                         <label asp-for="StartDay" class="control-label"></label>
-                        <input asp-for="StartDay" type="date" class="form-control" value="@DateTime.Now.AddDays(1).ToString("yyyy-MM-dd")" />
+                        @if (Model.StartDay.HasValue)
+                        {
+                            <input asp-for="StartDay" type="date" class="form-control" value="@Model.StartDay.Value.ToString("yyyy-MM-dd")" />
+                        }
+                        else
+                        {
+                            <input asp-for="StartDay" type="date" class="form-control" value="@DateTime.Now.AddDays(1).ToString("yyyy-MM-dd")" />
+                        }
                     </div>
                 </div>
             </div>
@@ -59,7 +67,14 @@
                 <div class="col-4">
                     <div class="form-group">
                         <label asp-for="ClosingDay" class="control-label"></label>
-                        <input asp-for="ClosingDay" type="date" class="form-control" value="@DateTime.Now.AddDays(2).ToString("yyyy-MM-dd")" />
+                        @if (Model.ClosingDay.HasValue)
+                        {
+                            <input asp-for="ClosingDay" type="date" class="form-control" value="@Model.ClosingDay.Value.ToString("yyyy-MM-dd")" />
+                        }
+                        else
+                        {
+                            <input asp-for="ClosingDay" type="date" class="form-control" value="@DateTime.Now.AddDays(2).ToString("yyyy-MM-dd")" />
+                        }
                     </div>
                 </div>
             </div>
