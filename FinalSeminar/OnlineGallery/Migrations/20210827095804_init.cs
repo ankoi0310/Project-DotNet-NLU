@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace OnlineGallery.Migrations
 {
-    public partial class init10 : Migration
+    public partial class init : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -191,6 +191,7 @@ namespace OnlineGallery.Migrations
                     CreateDate = table.Column<DateTime>(type: "datetime", nullable: true),
                     CompletionDate = table.Column<DateTime>(type: "datetime", nullable: true),
                     TotalPrice = table.Column<int>(type: "int", nullable: false),
+                    Auctioned = table.Column<bool>(type: "bit", nullable: false),
                     Status = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>

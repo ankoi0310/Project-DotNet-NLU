@@ -52,10 +52,10 @@
                                     @product.Name
                                 </td>
                                 <td class="align-middle text-center">
-                                    @item.StartDay.Value.ToString("HH:mm dd/MM/yyyy")
+                                    @item.StartDay.Value.ToString("dd/MM/yyyy HH:mm")
                                 </td>
                                 <td class="align-middle text-center">
-                                    @item.ClosingDay.Value.ToString("HH:mm dd/MM/yyyy")
+                                    @item.ClosingDay.Value.ToString("dd/MM/yyyy HH:mm")
                                 </td>
                                 <td class="align-middle text-center">
                                     @item.StartingPrice.Value.ToString("C")
@@ -81,11 +81,13 @@
                                     }
                                 </td>
                                 <td class="align-middle text-center">
-                                    <a onclick="showInPopup('@Url.Action("CreateOrUpdate", "Auction", new { item.Id }, Context.Request.Scheme)', 'Update Auction')" class="btn btn-info">@*<i class="fas fa-pencil-alt"></i>*@ Edit</a>
-
-                                    <form asp-action="Delete" asp-route-id="@item.Id" onsubmit="return jQueryAjaxSoldConfirm(this);" class="d-inline">
-                                        <input type="submit" value="Delete" class="btn btn-warning" />
-                                    </form>
+                                    @if (item.StartDay.Value.CompareTo(DateTime.Now) > 0)
+                                    {
+                                        <a onclick="showInPopup('@Url.Action("CreateOrUpdate", "Auction", new { item.Id }, Context.Request.Scheme)', 'Update Auction')" class="btn btn-info">Edit</a>
+                                        <form asp-action="Delete" asp-route-id="@item.Id" onsubmit="return jQueryAjaxSoldConfirm(this);" class="d-inline">
+                                            <input type="submit" value="Delete" class="btn btn-warning" />
+                                        </form>
+                                    }
                                 </td>
                             </tr>
                         }
@@ -97,7 +99,3 @@
         <!-- /.card -->
     </div>
 </div>
-
-<script>
-
-</script>

@@ -1,1 +1,181 @@
-﻿
+﻿@using Microsoft.AspNetCore.Identity;
+@using OnlineGallery.Areas.Identity.Data;
+@using OnlineGallery.Data;
+
+@inject ApplicationDbContext context
+@inject UserManager<ApplicationUser> userManager
+
+@model IEnumerable<Product>
+
+@{
+    ViewData["Title"] = "Checkout";
+
+    int count = 0;
+    int totalPrice = 0;
+    var user = await userManager.GetUserAsync(User);
+    var last = context.Transactions.OrderBy(e => e.Id).Last();
+}
+
+<!--============= Hero Section Starts Here =============-->
+<div class="hero-section">
+    <div class="container">
+        <ul class="breadcrumb">
+            <li>
+                <a href="~/">Home</a>
+            </li>
+            <li>
+                <span>Contact Us</span>
+            </li>
+        </ul>
+    </div>
+    <div class="bg_img hero-bg bottom_center" data-background="@Url.Content("~/assets/images/banner/hero-bg.png")"></div>
+</div>
+<!--============= Hero Section Ends Here =============-->
+<!--============= Contact Section Starts Here =============-->
+<section class="contact-section padding-bottom">
+    <div class="container">
+        <div class="pl-2 pr-2 contact-wrapper mt--100 mt-lg--440">
+            <div class="text-center pt-30 pb-20">
+                <h2 class="title">INVOICE</h2>
+            </div>
+            <form asp-action="ConfirmPayment" asp-route-id="@ViewBag.Id" method="POST" onsubmit="return confirmPurchase();">
+                <div class="row">
+                    <div class="col-9 pr-0 text-right">
+                        <span class="font-weight-bolder">Invoice No</span>
+                    </div>
+                    <div class="col-3 pl-4">
+                        <span>:&nbsp;<i>@(ViewBag.Id == 0 ? last.Id + 1 : last.Id)</i></span>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-9 pr-0 text-right">
+                        <span class="font-weight-bolder">Date</span>
+                    </div>
+                    <div class="col-3 pl-4">
+                        <span>:&nbsp;<i>@DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss")</i></span>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12 pl-5 pr-5">
+                        <table class="w-100">
+                            <tr>
+                                <td class="w-25">
+                                    <span class="font-weight-bolder">Name</span>
+                                </td>
+                                <td>
+                                    <span class="font-weight-bolder">:&emsp;@user.FullName.ToUpper()</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="w-25">
+                                    <span class="font-weight-bolder">Address</span>
+                                </td>
+                                <td>
+                                    @if (user.Address != null)
+                                    {
+                                        <span class="font-weight-bolder">:&emsp;@user.Address</span>
+                                    }
+                                    else
+                                    {
+                                        <span>:&emsp;</span>
+                                        <input type="text" class="w-50" name="Address" placeholder="Address" />
+                                        <label class="text-danger">@Html.ValidationMessage("Address")</label>
+                                    }
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="w-25">
+                                    <span class="font-weight-bolder">Phone number</span>
+                                </td>
+                                <td>
+                                    @if (user.PhoneNumber != null)
+                                    {
+                                        <span class="font-weight-bolder">:&emsp;@user.PhoneNumber</span>
+                                    }
+                                    else
+                                    {
+                                        <span>:&emsp;</span>
+                                        <input type="text" class="w-50" name="PhoneNumber" placeholder="Phone number" />
+                                        <label class="text-danger">@Html.ValidationMessage("PhoneNumber")</label>
+                                    }
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card border-0">
+                            <div class="card-body">
+                                <table class="table table-bordered table-striped" style="table-layout: fixed;">
+                                    <thead>
+                                        <tr>
+                                            <th class="align-middle text-center" style="width: 15%;">
+                                                No.
+                                            </th>
+                                            <th class="align-middle text-center">
+                                                @Html.DisplayNameFor(item => item.Name)
+                                            </th>
+                                            <th class="align-middle text-center" style="width: 20%">
+                                                @Html.DisplayNameFor(item => item.DefaultPrice)
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="cart-body">
+                                        @foreach (var item in Model)
+                                        {
+                                            count++;
+                                            totalPrice += item.DefaultPrice.Value;
+                                            <tr>
+                                                <td class="align-middle text-center">@count</td>
+                                                <td class="align-middle">@item.Name</td>
+                                                <td class="align-middle text-right">@item.DefaultPrice.Value.ToString("C")</td>
+                                            </tr>
+                                        }
+                                        <tr>
+                                            <td colspan="2" class="align-middle text-right font-weight-bolder">Total</td>
+                                            <td class="text-right">@totalPrice.ToString("C")</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <!-- /.card-body -->
+                        </div>
+                        <!-- /.card -->
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12 pl-3 pr-3">
+                        <div class="container">
+                            <div class="row">
+                                <div class="col">
+                                    <h3 class="border-bottom">Payment method</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row pt-30 pb-30">
+                    <div class="col-3 pl-5">
+                        <a href="~/Home/Cart" class="btn"><span><i class="fas fa-arrow-alt-circle-left"></i> Back to Cart</span></a>
+                    </div>
+                    <div class="col-6"></div>
+                    <div class="col-3 pr-5">
+                        <input type="hidden" name="CreateDate" value="@DateTime.Now" />
+                        <input type="hidden" name="TotalPrice" value="@totalPrice" />
+                        <button type="submit" class="btn text-right"><span>Confirm <i class="fas fa-arrow-alt-circle-right"></i></span></button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+<!--============= Contact Section Ends Here =============-->
+<script>
+    confirmPurchase = () => {
+        if (confirm('Do you agree to buy these products?')) {
+            return true;
+        }
+        return false;
+    }
+</script> 

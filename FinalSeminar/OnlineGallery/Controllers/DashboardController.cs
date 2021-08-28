@@ -114,13 +114,28 @@ namespace OnlineGallery.Controllers
 
         public async Task<IActionResult> MyBids()
         {
-            await _context.Products.ToListAsync();
+            await _context.AuctionRecords.ToListAsync();
             return View();
         }
 
-        public IActionResult WinningBids()
+        public async Task<IActionResult> WinningBids()
         {
-            return View();
+            List<Auction> auctions = new();
+            await _context.Auctions.ToListAsync();
+            var userId = _userManager.GetUserId(User);
+            var auctionRecords = await _context.AuctionRecords.Where(e => e.UserId.Equals(userId)).ToListAsync();
+            if (auctionRecords == null)
+            {
+                return View();
+            }
+            foreach (var record in auctionRecords)
+            {
+                if (Tools.IsWinner(_context, record))
+                {
+                    auctions.Add(record.Auction);
+                }
+            }
+            return View(auctions);
         }
 
         public async Task<IActionResult> MyFavorites()

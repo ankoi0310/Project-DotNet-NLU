@@ -1,4 +1,8 @@
-﻿@model IEnumerable<OnlineGallery.Models.AuctionRecord>
+﻿@using OnlineGallery.Data;
+
+@inject ApplicationDbContext context
+
+@model IEnumerable<OnlineGallery.Models.AuctionRecord>
 
 @{
     ViewData["Title"] = "Record";
@@ -8,5 +12,74 @@
 <h1 class="text-center"><i class="far fa-clipboard"></i>&ensp;@ViewData["Title"]</h1>
 
 <div id="view-all">
-    @await Html.PartialAsync("_ViewAll", Model)
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <table id="auction-record" class="table table-bordered table-striped">
+                        <thead>
+                            <tr>
+                                <th class="align-middle text-center">
+                                    @Html.DisplayNameFor(item => item.AuctionId)
+                                </th>
+                                <th class="align-middle text-center">
+                                    @Html.DisplayNameFor(item => item.Auction.ProductId)
+                                </th>
+                                <th class="align-middle text-center">
+                                    @Html.DisplayNameFor(item => item.UserId)
+                                </th>
+                                <th class="align-middle text-center">
+                                    @Html.DisplayNameFor(item => item.BidPrice)
+                                </th>
+                                <th class="align-middle text-center">
+                                    @Html.DisplayNameFor(item => item.Day)
+                                </th>
+                                <th class="align-middle text-center">
+                                    Status
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td class="align-middle text-center">
+                                        @item.AuctionId
+                                    </td>
+                                    <td class="align-middle">
+                                        @item.Auction.Product.Name
+                                    </td>
+                                    <td class="align-middle">
+                                        @item.User.UserName
+                                    </td>
+                                    <td class="align-middle text-center">
+                                        @item.BidPrice.Value.ToString("C")
+                                    </td>
+                                    <td class="align-middle text-center">
+                                        @item.Day.Value.ToString("dd/MM/yyyy HH:mm:ss")
+                                    </td>
+                                    <td class="align-middle font-weight-bolder text-center">
+                                        @if (Tools.IsSold(context, item.Auction.ProductId.Value))
+                                        {
+                                            <span class="text-success">Successfully</span>
+                                        }
+                                        else if (Tools.IsWinner(context, item))
+                                        {
+                                            <span class="text-danger">Winner</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-success">Successfully</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                <!-- /.card-body -->
+            </div>
+            <!-- /.card -->
+        </div>
+    </div>
 </div>

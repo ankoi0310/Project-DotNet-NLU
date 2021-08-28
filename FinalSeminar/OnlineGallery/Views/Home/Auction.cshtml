@@ -1,9 +1,8 @@
-﻿@using Microsoft.EntityFrameworkCore;
-@using OnlineGallery.Areas.Identity.Data;
+﻿@using OnlineGallery.Areas.Identity.Data;
 @using Microsoft.AspNetCore.Identity;
 @using OnlineGallery.Data;
 
-@model IEnumerable<OnlineGallery.Models.Auction>
+@model IEnumerable<Auction>
 
 @inject ApplicationDbContext context
 @inject UserManager<ApplicationUser> userManager
@@ -14,7 +13,6 @@
     int pageSize = 3;
     var user = await userManager.GetUserAsync(User);
     var featuredList = context.Auctions.Where(e => e.Status).OrderByDescending(key => key.Id).Take(3).OrderBy(key => key.Id);
-
 }
 
 <!--============= Hero Section Starts Here =============-->
@@ -32,17 +30,7 @@
     <div class="bg_img hero-bg bottom_center" data-background="@Url.Content("~/assets/images/banner/hero-bg.png")"></div>
 </div>
 <!--============= Hero Section Ends Here =============-->
-@if (Model.Count() == 0)
-{
-    <section class="featured-auction-section padding-bottom mt--240 mt-lg--440 pos-rel">
-        <div class="container">
-            <div class="section-header cl-white mw-100 left-style">
-                <h3 class="title">There Are Currently No Auctions!</h3>
-            </div>
-        </div>
-    </section>
-}
-else
+@if (Model == null)
 {
     <!--============= Featured Auction Section Starts Here =============-->
     <section class="featured-auction-section padding-bottom mt--240 mt-lg--440 pos-rel">
@@ -53,15 +41,16 @@ else
             <div class="row justify-content-center mb-30-none">
                 @foreach (var item in featuredList)
                 {
+                    var product = context.Products.Find(item.ProductId);
                     var lastBidPrice = item.AuctionRecords != null ? item.AuctionRecords.Select(e => e.BidPrice).Last() : item.StartingPrice;
-                    var bids = await context.AuctionRecords.Where(e => e.AuctionId == item.Id).CountAsync();
+                    var bids = context.AuctionRecords.Where(e => e.AuctionId == item.Id).Count();
 
                     <div class="col-sm-10 col-md-6 col-lg-4">
                         <div class="auction-item-2">
                             <div class="auction-thumb">
-                                <a href="~/Home/AuctionDetail/@item.Id" title="Go to detail"><img src="~/images/@item.Product.Image" alt="car"></a>
-                                <a href="~/Home/AddOrRemoveFavorites/@item.Product.Id" id="like-feature-@(item.Product.Id)" onclick="return jQueryAjaxFavorites('@Url.Action("AddOrRemoveFavorites", "Home", new { item.Product.Id }, Context.Request.Scheme)');" class="rating">
-                                    @if (user != null && Tools.IsMyFavorites(context, user.Id, item.Product.Id))
+                                <a href="~/Home/AuctionDetail/@item.Id" title="Go to detail"><img src="~/images/@product.Image" alt="car"></a>
+                                <a href="~/Home/AddOrRemoveFavorites/@product.Id" id="like-feature-@(product.Id)" onclick="return jQueryAjaxFavorites('@Url.Action("AddOrRemoveFavorites", "Home", new { product.Id }, Context.Request.Scheme)');" class="rating">
+                                    @if (user != null && Tools.IsMyFavorites(context, user.Id, product.Id))
                                     {
                                         <i class="fas fa-star"></i>
                                     }
@@ -72,8 +61,8 @@ else
                                 </a>
                             </div>
                             <div class="auction-content">
-                                <h6 class="title">
-                                    <a href="#0">@item.Product.Name</a>
+                                <h6 class="title font-weight-bolder">
+                                    <a href="~/Home/AuctionDetail/@item.Id">@product.Name</a>
                                 </h6>
                                 <div class="bid-area">
                                     <div class="bid-amount">
@@ -91,7 +80,7 @@ else
                                         </div>
                                         <div class="amount-content">
                                             <div class="current">Buy Now</div>
-                                            <div class="amount">@item.Product.DefaultPrice.Value.ToString("C")</div>
+                                            <div class="amount">@product.DefaultPrice.Value.ToString("C")</div>
                                         </div>
                                     </div>
                                 </div>
@@ -114,42 +103,56 @@ else
         <div class="container">
             <div class="product-header mb-40">
                 <div class="product-header-item">
-                    <div class="item">Sort By : </div>
-                    <select name="sort-by" class="select-bar">
-                        <option value="all">All</option>
-                        <option value="name">Name</option>
-                        <option value="date">Date</option>
-                        <option value="type">Type</option>
-                        <option value="car">Car</option>
-                    </select>
-                </div>
-                <div class="product-header-item">
                     <div class="item">Show : </div>
-                    <select name="sort-by" class="select-bar">
-                        <option value="09">09</option>
-                        <option value="21">21</option>
-                        <option value="30">30</option>
-                        <option value="39">39</option>
-                        <option value="60">60</option>
-                    </select>
+                    <form action="~/Home/Auction">
+                        <input type="hidden" name="page" value="1" />
+                        <select name="show" class="select-bar" onchange="this.form.submit()">
+                            <option value="all">All</option>
+                            <option value="upcoming">Upcoming</option>
+                            <option value="inprocess">In process</option>
+                            <option value="ended">Ended</option>
+                        </select>
+                    </form>
                 </div>
-                <form class="product-search ml-auto">
-                    <input type="text" placeholder="Item Name">
-                    <button type="submit"><i class="fas fa-search"></i></button>
-                </form>
             </div>
             <div class="row mb-30-none justify-content-center">
-                @foreach (var item in Model)
+                <h3 class="title">There Are Currently No Auctions!</h3>
+            </div>
+        </div>
+    </div>
+    <!--============= Product Auction Section Ends Here =============-->
+}
+else if (Model.Count() == 0)
+{
+    <section class="featured-auction-section padding-bottom mt--240 mt-lg--440 pos-rel">
+        <div class="container">
+            <div class="section-header cl-white mw-100 left-style">
+                <h3 class="title">There Are Currently No Auctions!</h3>
+            </div>
+        </div>
+    </section>
+}
+else
+{
+    <!--============= Featured Auction Section Starts Here =============-->
+    <section class="featured-auction-section padding-bottom mt--240 mt-lg--440 pos-rel">
+        <div class="container">
+            <div class="section-header cl-white mw-100 left-style">
+                <h3 class="title">Bid on These Featured Auctions!</h3>
+            </div>
+            <div class="row justify-content-center mb-30-none">
+                @foreach (var item in featuredList)
                 {
+                    var product = context.Products.Find(item.ProductId);
                     var lastBidPrice = item.AuctionRecords != null ? item.AuctionRecords.Select(e => e.BidPrice).Last() : item.StartingPrice;
-                    var bids = await context.AuctionRecords.Where(e => e.AuctionId == item.Id).CountAsync();
+                    var bids = context.AuctionRecords.Where(e => e.AuctionId == item.Id).Count();
 
                     <div class="col-sm-10 col-md-6 col-lg-4">
                         <div class="auction-item-2">
                             <div class="auction-thumb">
-                                <a href="~/Home/AuctionDetail/@item.Id"><img src="~/images/@item.Product.Image" alt="product"></a>
-                                <a href="~/Home/AddOrRemoveFavorites/@item.Product.Id" id="like-@(item.Product.Id)" onclick="return jQueryAjaxFavorites('@Url.Action("AddOrRemoveFavorites", "Home", new { item.Product.Id }, Context.Request.Scheme)');" class="rating">
-                                    @if (user != null && Tools.IsMyFavorites(context, user.Id, item.Product.Id))
+                                <a href="~/Home/AuctionDetail/@item.Id" title="Go to detail"><img src="~/images/@product.Image" alt="car"></a>
+                                <a href="~/Home/AddOrRemoveFavorites/@product.Id" id="like-feature-@(product.Id)" onclick="return jQueryAjaxFavorites('@Url.Action("AddOrRemoveFavorites", "Home", new { product.Id }, Context.Request.Scheme)');" class="rating">
+                                    @if (user != null && Tools.IsMyFavorites(context, user.Id, product.Id))
                                     {
                                         <i class="fas fa-star"></i>
                                     }
@@ -160,8 +163,8 @@ else
                                 </a>
                             </div>
                             <div class="auction-content">
-                                <h6 class="title">
-                                    <a href="~/Home/AuctionDetail/@item.Id">@item.Product.Name</a>
+                                <h6 class="title font-weight-bolder">
+                                    <a href="~/Home/AuctionDetail/@item.Id">@product.Name</a>
                                 </h6>
                                 <div class="bid-area">
                                     <div class="bid-amount">
@@ -179,7 +182,7 @@ else
                                         </div>
                                         <div class="amount-content">
                                             <div class="current">Buy Now</div>
-                                            <div class="amount">@item.Product.DefaultPrice.Value.ToString("C")</div>
+                                            <div class="amount">@product.DefaultPrice.Value.ToString("C")</div>
                                         </div>
                                     </div>
                                 </div>
@@ -194,38 +197,142 @@ else
                     </div>
                 }
             </div>
+        </div>
+    </section>
+    <!--============= Featured Auction Section Ends Here =============-->
+    <!--============= Product Auction Section Starts Here =============-->
+    <div class="product-auction padding-bottom">
+        <div class="container">
+            <div class="product-header mb-40">
+                <div class="product-header-item">
+                    <div class="item">Show : </div>
+                    <form action="~/Home/Auction">
+                        <input type="hidden" name="page" value="1" />
+                        <select name="show" class="select-bar" onchange="this.form.submit()">
+                            <option value="all">All</option>
+                            <option value="upcoming">Upcoming</option>
+                            <option value="inprocess">In process</option>
+                            <option value="ended">Ended</option>
+                        </select>
+                    </form>
+                </div>
+            </div>
+            <div class="row mb-30-none justify-content-center">
+                @foreach (var item in Model)
+                {
+                    var product = context.Products.Find(item.ProductId);
+                    var lastBidPrice = item.AuctionRecords != null ? item.AuctionRecords.Select(e => e.BidPrice).Last() : item.StartingPrice;
+                    var bids = context.AuctionRecords.Where(e => e.AuctionId == item.Id).Count();
+
+                    <div class="col-sm-10 col-md-6 col-lg-4">
+                        <div class="auction-item-2">
+                            <div class="auction-thumb">
+                                <a href="~/Home/AuctionDetail/@item.Id"><img src="~/images/@product.Image" alt="product"></a>
+                                <a href="~/Home/AddOrRemoveFavorites/@product.Id" id="like-@(product.Id)" onclick="return jQueryAjaxFavorites('@Url.Action("AddOrRemoveFavorites", "Home", new { product.Id }, Context.Request.Scheme)');" class="rating">
+                                    @if (user != null && Tools.IsMyFavorites(context, user.Id, product.Id))
+                                    {
+                                        <i class="fas fa-star"></i>
+                                    }
+                                    else
+                                    {
+                                        <i class="far fa-star"></i>
+                                    }
+                                </a>
+                            </div>
+                            <div class="auction-content">
+                                <h6 class="title">
+                                    <a href="~/Home/AuctionDetail/@item.Id" class="font-weight-bolder">@product.Name</a>
+                                    <span>Time: @item.StartDay.Value.ToString("dd/MM/yyyy") - @item.ClosingDay.Value.ToString("dd/MM/yyyy")</span>
+                                </h6>
+                                @if (item.Status)
+                                {
+                                    <div class="bid-area">
+                                        <div class="bid-amount">
+                                            <div class="icon">
+                                                <i class="flaticon-auction"></i>
+                                            </div>
+                                            <div class="amount-content">
+                                                <div class="current">Current Bid</div>
+                                                <div class="amount">@lastBidPrice.Value.ToString("C")</div>
+                                            </div>
+                                        </div>
+                                        <div class="bid-amount">
+                                            <div class="icon">
+                                                <i class="flaticon-money"></i>
+                                            </div>
+                                            <div class="amount-content">
+                                                <div class="current">Buy Now</div>
+                                                <div class="amount">@product.DefaultPrice.Value.ToString("C")</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="countdown-area">
+                                        <div class="countdown">
+                                            <div id="counter@(item.Id)" data-countdown="@item.ClosingDay.Value.ToString("MM/dd/yyyy")"></div>
+                                        </div>
+                                        <span class="total-bids">@bids Bids</span>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="bid-area">
+                                        <div class="bid-amount">
+                                            <div class="icon">
+                                                <i class="flaticon-auction"></i>
+                                            </div>
+                                            <div class="amount-content">
+                                                <div class="current">Total Bids</div>
+                                                <div class="amount">@bids Bids</div>
+                                            </div>
+                                        </div>
+                                        <div class="bid-amount">
+                                            <div class="icon">
+                                                <i class="flaticon-money"></i>
+                                            </div>
+                                            <div class="amount-content">
+                                                <div class="current">Last Price</div>
+                                                <div class="amount">@lastBidPrice.Value.ToString("C")</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
             <ul class="pagination">
                 @{
-                    decimal totalSize = await context.Auctions.Where(e => e.Status).CountAsync();
+                    decimal totalSize = ViewBag.TotalSize;
                     decimal totalPage = Math.Ceiling(totalSize / pageSize);
                     if (ViewBag.CurrentPage == 1)
                     {
                         <li>
-                            <a href="~/Home/Auctions?page=@(totalPage)"><i class="flaticon-left-arrow"></i></a>
+                            <a href="~/Home/Auction?page=@(totalPage)&show=@ViewBag.CurrentShow"><i class="flaticon-left-arrow"></i></a>
                         </li>
                     }
                     else
                     {
                         <li>
-                            <a href="~/Home/Auctions?page=@(ViewBag.CurrentPage - 1)"><i class="flaticon-left-arrow"></i></a>
+                            <a href="~/Home/Auction?page=@(ViewBag.CurrentPage - 1)&show=@ViewBag.CurrentShow"><i class="flaticon-left-arrow"></i></a>
                         </li>
                     }
                     for (int i = 1; i <= totalPage; i++)
                     {
                         <li>
-                            <a href="~/Home/Auctions?page=@i">@i</a>
+                            <a href="~/Home/Auction?page=@i&show=@ViewBag.CurrentShow">@i</a>
                         </li>
                     }
                     if (ViewBag.CurrentPage == totalPage)
                     {
                         <li>
-                            <a href="~/Home/Auctions?page=1"><i class="flaticon-right-arrow"></i></a>
+                            <a href="~/Home/Auction?page=1&show=@ViewBag.CurrentShow"><i class="flaticon-right-arrow"></i></a>
                         </li>
                     }
                     else
                     {
                         <li>
-                            <a href="~/Home/Product?page=@(ViewBag.CurrentPage + 1)"><i class="flaticon-right-arrow"></i></a>
+                            <a href="~/Home/Auctions?page=@(ViewBag.CurrentPage + 1)&show=@ViewBag.CurrentShow"><i class="flaticon-right-arrow"></i></a>
                         </li>
                     }
                 }

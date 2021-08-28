@@ -1,201 +1,63 @@
-﻿@{
+﻿@using Microsoft.AspNetCore.Identity
+@using OnlineGallery.Areas.Identity.Data;
+@using OnlineGallery.Data;
+
+@model IEnumerable<Auction>
+
+@inject UserManager<ApplicationUser> userManager
+@inject ApplicationDbContext context
+
+@{
     ViewData["Title"] = "Winning Bids";
     ViewData["WinningBids"] = "active";
     Layout = "~/Views/Shared/_DashboardLayout.cshtml";
+
+    var user = await userManager.GetUserAsync(User);
 }
 
 <div class="dash-bid-item dashboard-widget mb-40-60">
     <div class="header">
         <h4 class="title">Winning Bids</h4>
     </div>
-    <div class="button-area justify-content-between">
-        <form class="product-search">
-            <input type="text" placeholder="Item Name">
-            <button type="submit"><i class="fas fa-search"></i></button>
-        </form>
-        <div class="sort-winning-bid">
-            <div class="item">Sort By : </div>
-            <select name="sort-by" class="select-bar">
-                <option value="all">All</option>
-                <option value="name">Name</option>
-                <option value="date">Date</option>
-                <option value="type">Type</option>
-                <option value="car">Car</option>
-            </select>
-        </div>
-    </div>
+    @if (Model.Count() == 0)
+    {
+        <p>You haven't won any auction yet. Keep trying !!!</p>
+    }
 </div>
 <div class="row mb-30-none justify-content-center">
-    <div class="col-sm-10 col-md-6">
-        <div class="auction-item-2">
-            <div class="auction-thumb">
-                <a href="product-details.html"><img src="assets/images/auction/car/auction-3.jpg" alt="car"></a>
-                <a href="#0" class="rating"><i class="far fa-star"></i></a>
-                <a href="#0" class="bid"><i class="flaticon-auction"></i></a>
-            </div>
-            <div class="auction-content">
-                <h6 class="title">
-                    <a href="#0">2018 Hyundai Sonata</a>
-                </h6>
-                <div class="bid-area">
-                    <div class="bid-amount">
-                        <div class="icon">
-                            <i class="flaticon-auction"></i>
-                        </div>
-                        <div class="amount-content">
-                            <div class="current">Current Bid</div>
-                            <div class="amount">$876.00</div>
-                        </div>
-                    </div>
-                    <div class="bid-amount">
-                        <div class="icon">
-                            <i class="flaticon-money"></i>
-                        </div>
-                        <div class="amount-content">
-                            <div class="current">Buy Now</div>
-                            <div class="amount">$5,00.00</div>
-                        </div>
-                    </div>
+    @foreach (var item in Model)
+    {
+        var lastBidPrice = item.AuctionRecords.Select(e => e.BidPrice.Value).Last();
+        var product = context.Products.Find(item.ProductId);
+        var transactionId = context.TransactionDetails.Where(e => e.Product.Equals(product)).Select(e => e.TransactionId).FirstOrDefault();
+        <div class="col-sm-10 col-md-6">
+            <div class="auction-item-2">
+                <div class="auction-thumb">
+                    <a href="~/Home/AuctionDetail/@item.Id"><img src="~/images/@product.Image" alt="car"></a>
+                    <a href="~/Home/AddOrRemoveFavorites/@product.Id" id="like-feature-@(product.Id)" onclick="return jQueryAjaxFavorites('@Url.Action("AddOrRemoveFavorites", "Home", new { product.Id }, Context.Request.Scheme)');" class="rating">
+                        @if (user != null && Tools.IsMyFavorites(context, user.Id, product.Id))
+                        {
+                            <i class="fas fa-star"></i>
+                        }
+                        else
+                        {
+                            <i class="far fa-star"></i>
+                        }
+                    </a>
                 </div>
-                <div class="countdown-area">
-                    <div class="countdown">
-                        <div id="bid_counter26"></div>
+                <div class="auction-content">
+                    <h6 class="title">
+                        <a href="~/Home/AuctionDetail/@item.Id" class="font-weight-bolder">@product.Name</a>
+                        <span>Time: @item.StartDay.Value.ToString("dd/MM/yyyy") - @item.ClosingDay.Value.ToString("dd/MM/yyyy")</span>
+                        <span>Last Price: @lastBidPrice.ToString("C")</span>
+                    </h6>
+                    <div class="text-center">
+                        <form action="~/Home/Checkout/@transactionId" method="post">
+                            <button type="submit" class="btn btn-outline-success">Checkout <i class="fas fa-hand-holding-usd"></i></button>
+                        </form>
                     </div>
-                    <span class="total-bids">30 Bids</span>
-                </div>
-                <div class="text-center">
-                    <a href="#0" class="custom-button">Submit a bid</a>
                 </div>
             </div>
         </div>
-    </div>
-    <div class="col-sm-10 col-md-6">
-        <div class="auction-item-2">
-            <div class="auction-thumb">
-                <a href="product-details.html"><img src="assets/images/auction/product/08.png" alt="car"></a>
-                <a href="#0" class="rating"><i class="far fa-star"></i></a>
-                <a href="#0" class="bid"><i class="flaticon-auction"></i></a>
-            </div>
-            <div class="auction-content">
-                <h6 class="title">
-                    <a href="#0">2018 Nissan Versa, S</a>
-                </h6>
-                <div class="bid-area">
-                    <div class="bid-amount">
-                        <div class="icon">
-                            <i class="flaticon-auction"></i>
-                        </div>
-                        <div class="amount-content">
-                            <div class="current">Current Bid</div>
-                            <div class="amount">$876.00</div>
-                        </div>
-                    </div>
-                    <div class="bid-amount">
-                        <div class="icon">
-                            <i class="flaticon-money"></i>
-                        </div>
-                        <div class="amount-content">
-                            <div class="current">Buy Now</div>
-                            <div class="amount">$5,00.00</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="countdown-area">
-                    <div class="countdown">
-                        <div id="bid_counter27"></div>
-                    </div>
-                    <span class="total-bids">30 Bids</span>
-                </div>
-                <div class="text-center">
-                    <a href="#0" class="custom-button">Submit a bid</a>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="col-sm-10 col-md-6">
-        <div class="auction-item-2">
-            <div class="auction-thumb">
-                <a href="product-details.html"><img src="assets/images/auction/product/04.png" alt="product"></a>
-                <a href="#0" class="rating"><i class="far fa-star"></i></a>
-                <a href="#0" class="bid"><i class="flaticon-auction"></i></a>
-            </div>
-            <div class="auction-content">
-                <h6 class="title">
-                    <a href="#0">2019 Mercedes-Benz C, 300</a>
-                </h6>
-                <div class="bid-area">
-                    <div class="bid-amount">
-                        <div class="icon">
-                            <i class="flaticon-auction"></i>
-                        </div>
-                        <div class="amount-content">
-                            <div class="current">Current Bid</div>
-                            <div class="amount">$876.00</div>
-                        </div>
-                    </div>
-                    <div class="bid-amount">
-                        <div class="icon">
-                            <i class="flaticon-money"></i>
-                        </div>
-                        <div class="amount-content">
-                            <div class="current">Buy Now</div>
-                            <div class="amount">$5,00.00</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="countdown-area">
-                    <div class="countdown">
-                        <div id="bid_counter1"></div>
-                    </div>
-                    <span class="total-bids">30 Bids</span>
-                </div>
-                <div class="text-center">
-                    <a href="#0" class="custom-button">Submit a bid</a>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="col-sm-10 col-md-6">
-        <div class="auction-item-2">
-            <div class="auction-thumb">
-                <a href="product-details.html"><img src="assets/images/auction/product/07.png" alt="product"></a>
-                <a href="#0" class="rating"><i class="far fa-star"></i></a>
-                <a href="#0" class="bid"><i class="flaticon-auction"></i></a>
-            </div>
-            <div class="auction-content">
-                <h6 class="title">
-                    <a href="#0">2017 Harley-Davidson XG750,</a>
-                </h6>
-                <div class="bid-area">
-                    <div class="bid-amount">
-                        <div class="icon">
-                            <i class="flaticon-auction"></i>
-                        </div>
-                        <div class="amount-content">
-                            <div class="current">Current Bid</div>
-                            <div class="amount">$876.00</div>
-                        </div>
-                    </div>
-                    <div class="bid-amount">
-                        <div class="icon">
-                            <i class="flaticon-money"></i>
-                        </div>
-                        <div class="amount-content">
-                            <div class="current">Buy Now</div>
-                            <div class="amount">$5,00.00</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="countdown-area">
-                    <div class="countdown">
-                        <div id="bid_counter2"></div>
-                    </div>
-                    <span class="total-bids">30 Bids</span>
-                </div>
-                <div class="text-center">
-                    <a href="#0" class="custom-button">Submit a bid</a>
-                </div>
-            </div>
-        </div>
-    </div>
+    }
 </div>

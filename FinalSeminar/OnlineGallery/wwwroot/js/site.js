@@ -198,10 +198,13 @@ removeFromCart = (url) => {
             success: function (res) {
                 if (res.remove) {
                     $.notify(res.status, { globalPosition: "top center", className: "success" });
-                    if ($("#cart-body").html() == "") {
-                        $("#cart-body").html("<tr><td colspan='4' class='align-middle text-center'>No data available in table</td></tr>");
-                    }
-                    console.log($("#cart-body").html());
+                }
+                else {
+                    $.notify(res.status, { globalPosition: "top center", className: "error" });
+                }
+                var $cartbody = $("#cart-body").html().replace(/\s/g, '');
+                if ($cartbody == "") {
+                    $("#cart-body").html("<tr><td colspan='4' class='align-middle text-center'>No data available in table</td></tr>");
                 }
             },
             error: function (err) {

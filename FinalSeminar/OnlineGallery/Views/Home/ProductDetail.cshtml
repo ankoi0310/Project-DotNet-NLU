@@ -74,46 +74,53 @@
                             <li>Listing ID: @Model.Id</li>
                         </ul>
                     </div>
-                    <div class="buy-now-area">
-                        <a href="#0" class="font-weight-bolder custom-button">Buy Now: @Model.DefaultPrice.Value.ToString("C")</a>
-                        <a href="#0" class="font-weight-bolder custom-button text-dark" style="background: -webkit-linear-gradient( 90deg, #f1a8fc 0%, #a17878 100%); ">
-                            <span><i class="fas fa-cart-plus"></i>&nbsp;Add to cart</span>
-                        </a>
-                        <a href="~/Home/AddOrRemoveFavorites/@Model.Id" id="like-detail-@(Model.Id)" onclick="return jQueryAjaxFavorites('@Url.Action("AddOrRemoveFavorites", "Home", new { Model.Id }, Context.Request.Scheme)');" class="rating custom-button active border">
-                            @if (user != null)
-                            {
-                                @if (Tools.IsMyFavorites(context, user.Id, Model.Id))
+                    @if (Model.Status)
+                    {
+                        <div class="buy-now-area">
+                            <a href="#0" class="font-weight-bolder custom-button">Buy Now: @Model.DefaultPrice.Value.ToString("C")</a>
+                            <form asp-action="AddToCart" asp-route-id="@Model.Id" method="post" onsubmit="return addToCart('@Url.Action("AddToCart", "Home", new { Model.Id }, Context.Request.Scheme)');">
+                                <button style="background: -webkit-linear-gradient( 90deg, #f1a8fc 0%, #a17878 100%);" type="submit" class="font-weight-bolder custom-button">Add To Cart</button>
+                            </form>
+                            <a href="~/Home/AddOrRemoveFavorites/@Model.Id" id="like-detail-@(Model.Id)" onclick="return jQueryAjaxFavorites('@Url.Action("AddOrRemoveFavorites", "Home", new { Model.Id }, Context.Request.Scheme)');" class="rating custom-button active border">
+                                @if (user != null)
                                 {
-                                    <span class="font-weight-bolder"><i class="fas fa-star"></i>&nbsp;You have liked this</span>
+                                    @if (Tools.IsMyFavorites(context, user.Id, Model.Id))
+                                    {
+                                        <span class="font-weight-bolder"><i class="fas fa-star"></i>&nbsp;You have liked this</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="font-weight-bolder"><i class="far fa-star"></i>&nbsp;Add to your favorites</span>
+                                    }
                                 }
                                 else
                                 {
-                                    <span class="font-weight-bolder"><i class="far fa-star"></i>&nbsp;Add to your favorites</span>
+                                    <span><i class="far fa-star"></i>&nbsp;Add to your favorites</span>
                                 }
-                            }
-                            else
-                            {
-                                <span><i class="far fa-star"></i>&nbsp;Add to your favorites</span>
-                            }
-                        </a>
-                        <div class="share-area">
-                            <span>Share to:</span>
-                            <ul>
-                                <li>
-                                    <a href="#0"><i class="fab fa-facebook-f"></i></a>
-                                </li>
-                                <li>
-                                    <a href="#0"><i class="fab fa-twitter"></i></a>
-                                </li>
-                                <li>
-                                    <a href="#0"><i class="fab fa-linkedin-in"></i></a>
-                                </li>
-                                <li>
-                                    <a href="#0"><i class="fab fa-instagram"></i></a>
-                                </li>
-                            </ul>
+                            </a>
+                            <div class="share-area">
+                                <span>Share to:</span>
+                                <ul>
+                                    <li>
+                                        <a href="#0"><i class="fab fa-facebook-f"></i></a>
+                                    </li>
+                                    <li>
+                                        <a href="#0"><i class="fab fa-twitter"></i></a>
+                                    </li>
+                                    <li>
+                                        <a href="#0"><i class="fab fa-linkedin-in"></i></a>
+                                    </li>
+                                    <li>
+                                        <a href="#0"><i class="fab fa-instagram"></i></a>
+                                    </li>
+                                </ul>
+                            </div>
                         </div>
-                    </div>
+                    }
+                    else
+                    {
+                        <h2 class="text-danger">This Product Has Been Sold !</h2>
+                    }
                 </div>
             </div>
             @if (Model.Auction != null)

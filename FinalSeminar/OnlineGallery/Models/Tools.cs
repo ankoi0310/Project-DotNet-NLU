@@ -55,7 +55,7 @@ namespace OnlineGallery.Models
         public static List<Product> GetProductNotAuctioned(ApplicationDbContext context)
         {
             var auctioningList = context.Auctions.Where(e => e.Status || e.StartDay.Value.CompareTo(DateTime.Now) > 0).Select(e => e.ProductId).ToList();
-            var productsHaveGallery = context.ProductImages.Where(e => !auctioningList.Contains(e.ProductId)).Select(e => e.Product).Distinct().ToList();
+            var productsHaveGallery = context.ProductImages.Where(e => !auctioningList.Contains(e.ProductId) && e.Product.Status).Select(e => e.Product).Distinct().ToList();
             return productsHaveGallery;
         }
 
@@ -70,15 +70,12 @@ namespace OnlineGallery.Models
         }
 
         // Get the winner
-        public static bool IsWinner(ApplicationDbContext context, int? auctionId, string userId)
+        public static bool IsWinner(ApplicationDbContext context, AuctionRecord record)
         {
-            var auction = context.Auctions.Find(auctionId);
-
-            if (!auction.Status && auction.ClosingDay.Value.CompareTo(DateTime.Now) < 0)
+            if (!record.Auction.Status && record.Auction.ClosingDay.Value.CompareTo(DateTime.Now) < 0)
             {
-                var recentAuctionRecord = context.AuctionRecords.Find(auctionId, userId);
-                var lastAuctionRecord = context.AuctionRecords.Where(e => e.AuctionId.Equals(auctionId)).Last();
-                return recentAuctionRecord.Equals(lastAuctionRecord);
+                var lastRecord = context.AuctionRecords.Where(e => e.AuctionId.Value.Equals(record.AuctionId.Value)).OrderBy(e => e.Id).Last();
+                return lastRecord.Equals(record);
             }
             return false;
         }
@@ -93,6 +90,13 @@ namespace OnlineGallery.Models
         public static bool IsHaveCart(ApplicationDbContext context, string userId)
         {
             return context.Carts.Any(e => e.UserId.Equals(userId));
+        }
+
+        // Check if product has been sold
+        public static bool IsSold(ApplicationDbContext context, int id)
+        {
+            var soldProducts = context.TransactionDetails.Select(e => e.ProductId).ToList();
+            return soldProducts.Contains(id);
         }
     }
 }   

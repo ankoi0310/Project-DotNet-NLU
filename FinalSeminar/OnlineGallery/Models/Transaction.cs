@@ -35,6 +35,9 @@ namespace OnlineGallery.Models
         [Column("TotalPrice", TypeName = "int")]
         public int TotalPrice { get; set; }
 
+        [Column("Auctioned", TypeName = "bit")]
+        public bool Auctioned { get; set; }
+
         [Column("Status", TypeName = "bit")]
         public bool Status { get; set; }
     }

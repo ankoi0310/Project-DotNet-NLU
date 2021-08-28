@@ -1,6 +1,5 @@
-﻿@using Microsoft.EntityFrameworkCore;
-@using Microsoft.AspNetCore.Identity;
-@using OnlineGallery.Areas.Identity.Data; 
+﻿@using Microsoft.AspNetCore.Identity;
+@using OnlineGallery.Areas.Identity.Data;
 @using OnlineGallery.Data;
 
 @inject ApplicationDbContext context
@@ -36,15 +35,15 @@
         <div class="row mb-30-none justify-content-center">
             @foreach (var item in inProgressAuction)
             {
-                var lastBidPrice = item.AuctionRecords != null ? item.AuctionRecords.Select(e => e.BidPrice).Last() : item.StartingPrice;
-                var bids = await context.AuctionRecords.Where(e => e.AuctionId == item.Id).CountAsync();
-
+                var lastBidPrice = item.AuctionRecords.Select(e => e.BidPrice.Value).Last();
+                var bids = context.AuctionRecords.Where(e => e.AuctionId == item.Id).Count();
+                var product = context.Products.Find(item.ProductId);
                 <div class="col-sm-10 col-md-6">
                     <div class="auction-item-2">
                         <div class="auction-thumb">
-                            <a href="~/Home/AuctionDetail/@item.Id" title="Go to detail"><img src="~/images/@item.Product.Image" alt="car"></a>
-                            <a href="~/Home/AddOrRemoveFavorites/@item.Product.Id" id="like-feature-@(item.Product.Id)" onclick="return jQueryAjaxFavorites('@Url.Action("AddOrRemoveFavorites", "Home", new { item.Product.Id }, Context.Request.Scheme)');" class="rating">
-                                @if (user != null && Tools.IsMyFavorites(context, user.Id, item.Product.Id))
+                            <a href="~/Home/AuctionDetail/@item.Id" title="Go to detail"><img src="~/images/@product.Image" alt="car"></a>
+                            <a href="~/Home/AddOrRemoveFavorites/@product.Id" id="like-feature-@(product.Id)" onclick="return jQueryAjaxFavorites('@Url.Action("AddOrRemoveFavorites", "Home", new { product.Id }, Context.Request.Scheme)');" class="rating">
+                                @if (user != null && Tools.IsMyFavorites(context, user.Id, product.Id))
                                 {
                                     <i class="fas fa-star"></i>
                                 }
@@ -55,8 +54,8 @@
                             </a>
                         </div>
                         <div class="auction-content">
-                            <h6 class="title">
-                                <a href="#0">@item.Product.Name</a>
+                            <h6 class="title font-weight-bolder">
+                                <a href="~/Home/ProductDetail/@product.Id" title="Go to product">@product.Name</a>
                             </h6>
                             <div class="bid-area">
                                 <div class="bid-amount">
@@ -65,7 +64,7 @@
                                     </div>
                                     <div class="amount-content">
                                         <div class="current">Current Bid</div>
-                                        <div class="amount">@lastBidPrice.Value.ToString("C")</div>
+                                        <div class="amount">@lastBidPrice.ToString("C")</div>
                                     </div>
                                 </div>
                                 <div class="bid-amount">
@@ -74,7 +73,7 @@
                                     </div>
                                     <div class="amount-content">
                                         <div class="current">Buy Now</div>
-                                        <div class="amount">@item.Product.DefaultPrice.Value.ToString("C")</div>
+                                        <div class="amount">@product.DefaultPrice.Value.ToString("C")</div>
                                     </div>
                                 </div>
                             </div>
@@ -94,15 +93,15 @@
         <div class="row justify-content-center mb-30-none">
             @foreach (var item in passAuction)
             {
-                var lastBidPrice = item.AuctionRecords.Select(e => e.BidPrice).Last();
-                var bids = await context.AuctionRecords.Where(e => e.AuctionId == item.Id).CountAsync();
-
+                var lastBidPrice = item.AuctionRecords.Select(e => e.BidPrice.Value).Last();
+                var bids = context.AuctionRecords.Where(e => e.AuctionId == item.Id).Count();
+                var product = context.Products.Find(item.ProductId);
                 <div class="col-sm-10 col-md-6">
                     <div class="auction-item-2">
                         <div class="auction-thumb">
-                            <a href="~/Home/AuctionDetail/@item.Id" title="Go to detail"><img src="~/images/@item.Product.Image" alt="car"></a>
-                            <a href="~/Home/AddOrRemoveFavorites/@item.Product.Id" id="like-feature-@(item.Product.Id)" onclick="return jQueryAjaxFavorites('@Url.Action("AddOrRemoveFavorites", "Home", new { item.Product.Id }, Context.Request.Scheme)');" class="rating">
-                                @if (user != null && Tools.IsMyFavorites(context, user.Id, item.Product.Id))
+                            <a href="~/Home/AuctionDetail/@item.Id" title="Go to detail"><img src="~/images/@product.Image" alt="car"></a>
+                            <a href="~/Home/AddOrRemoveFavorites/@product.Id" id="like-feature-@(product.Id)" onclick="return jQueryAjaxFavorites('@Url.Action("AddOrRemoveFavorites", "Home", new { product.Id }, Context.Request.Scheme)');" class="rating">
+                                @if (user != null && Tools.IsMyFavorites(context, user.Id, product.Id))
                                 {
                                     <i class="fas fa-star"></i>
                                 }
@@ -114,7 +113,8 @@
                         </div>
                         <div class="auction-content">
                             <h6 class="title">
-                                <a href="#0">@item.Product.Name</a>
+                                <span class="font-weight-bolder">@product.Name</span><br />
+                                <span>Time: @item.StartDay.Value.ToString("dd/MM/yyyy") - @item.ClosingDay.Value.ToString("dd/MM/yyyy")</span>
                             </h6>
                             <div class="bid-area">
                                 <div class="bid-amount">
@@ -122,8 +122,8 @@
                                         <i class="flaticon-auction"></i>
                                     </div>
                                     <div class="amount-content">
-                                        <div class="current">Current Bid</div>
-                                        <div class="amount">@lastBidPrice.Value.ToString("C")</div>
+                                        <div class="current">Total Bids</div>
+                                        <div class="amount">@bids Bids</div>
                                     </div>
                                 </div>
                                 <div class="bid-amount">
@@ -131,16 +131,10 @@
                                         <i class="flaticon-money"></i>
                                     </div>
                                     <div class="amount-content">
-                                        <div class="current">Buy Now</div>
-                                        <div class="amount">@item.Product.DefaultPrice.Value.ToString("C")</div>
+                                        <div class="current">Last Price</div>
+                                        <div class="amount">@lastBidPrice.ToString("C")</div>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="countdown-area">
-                                <div class="countdown">
-                                    <div id="counter@(item.Id)" data-countdown="@item.ClosingDay.Value.ToString("MM/dd/yyyy")"></div>
-                                </div>
-                                <span class="total-bids">@bids Bids</span>
                             </div>
                         </div>
                     </div>

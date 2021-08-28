@@ -10,8 +10,8 @@ using OnlineGallery.Data;
 namespace OnlineGallery.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20210821184459_init-1.0")]
-    partial class init10
+    [Migration("20210827095804_init")]
+    partial class init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -450,6 +450,10 @@ namespace OnlineGallery.Migrations
                         .HasColumnType("int")
                         .HasColumnName("Id")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<bool>("Auctioned")
+                        .HasColumnType("bit")
+                        .HasColumnName("Auctioned");
 
                     b.Property<DateTime?>("CompletionDate")
                         .HasColumnType("datetime")

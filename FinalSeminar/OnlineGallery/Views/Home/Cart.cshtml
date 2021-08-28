@@ -4,6 +4,7 @@
     ViewData["Title"] = "Cart";
 
     int count = 0;
+    int total = 0;
 }
 
 <!--============= Hero Section Starts Here =============-->
@@ -24,9 +25,9 @@
 <!--============= Contact Section Starts Here =============-->
 <section class="contact-section padding-bottom">
     <div class="container">
-        <div class="contact-wrapper padding-top padding-bottom mt--100 mt-lg--440">
-            <div class="section-header">
-                <h2 class="title">Products In Cart</h2>
+        <div class="pl-2 pr-2 contact-wrapper mt--100 mt-lg--440">
+            <div class="text-center pt-30 pb-30">
+                <h2 class="title">PRODUCTS IN CART</h2>
             </div>
             <div class="row">
                 <div class="col-12">
@@ -35,30 +36,33 @@
                             <table class="table table-bordered table-striped" style="table-layout: fixed;">
                                 <thead>
                                     <tr>
-                                        <th class="align-middle text-center">
+                                        <th class="align-middle text-center" style="width: 10%;">
                                             No.
                                         </th>
                                         <th class="align-middle text-center">
                                             @Html.DisplayNameFor(item => item.Name)
                                         </th>
-                                        <th class="align-middle text-center">
+                                        <th class="align-middle text-center" style="width: 25%;">
                                             @Html.DisplayNameFor(item => item.DefaultPrice)
                                         </th>
-                                        <th></th>
+                                        <th style="width: 15%;">
+                                            <button onclick="return removeFromCart('@Url.Action("RemoveAllCart", "Home", null, Context.Request.Scheme)')" class="cart-remove-all text-danger">Remove All</button>
+                                        </th>
                                     </tr>
                                 </thead>
                                 <tbody id="cart-body">
-                                    @if (Model.ToList().Count != 0)
+                                    @if (Model != null)
                                     {
                                         foreach (var item in Model)
                                         {
                                             count++;
+                                            total += item.DefaultPrice.Value;
                                             <tr>
                                                 <td class="align-middle text-center">@count</td>
                                                 <td class="align-middle">@item.Name</td>
-                                                <td class="align-middle">@item.DefaultPrice.Value.ToString("C")</td>
+                                                <td class="align-middle text-right">@item.DefaultPrice.Value.ToString("C")</td>
                                                 <td>
-                                                    <button onclick="return removeFromCart('@Url.Action("RemoveFromCart", "Home", new { item.Id }, Context.Request.Scheme)')" class="remove-cart text-danger">Remove</button>
+                                                    <button onclick="return removeFromCart('@Url.Action("RemoveFromCart", "Home", new { item.Id }, Context.Request.Scheme)')" class="cart-remove text-danger">Remove</button>
                                                 </td>
                                             </tr>
                                         }
@@ -75,6 +79,14 @@
                         <!-- /.card-body -->
                     </div>
                     <!-- /.card -->
+                </div>
+            </div>
+            <div class="row pt-30 pb-30">
+                <div class="col-6 pl-4">
+                    <a href="~/Home" class="btn"><span><i class="fas fa-arrow-alt-circle-left"></i> Back to Home</span></a>
+                </div>
+                <div class="col-6 pr-4">
+                    <a href="~/Home/Checkout" class="btn float-right"><span>Go to checkout <i class="fas fa-arrow-alt-circle-right"></i></span></a>
                 </div>
             </div>
         </div>

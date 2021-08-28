@@ -36,11 +36,9 @@ namespace OnlineGallery.Controllers
             SetTimer();
         }
 
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
-            await _context.AuctionRecords.ToListAsync();
-            await _context.Auctions.ToListAsync();
-            await _context.Products.ToListAsync();
+            _context.AuctionRecords.ToList();
             return View();
         }
 
@@ -72,22 +70,140 @@ namespace OnlineGallery.Controllers
             return Json(new { remove = true, status = "Remove successfully !" });
         }
 
-        //public async Task<IActionResult> Checkout()
-        //{
-        //    return Task.CompletedTask;
-        //}
+        public async Task<IActionResult> RemoveAllCart()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            var cart = await _context.Carts.Where(e => e.User.Equals(user)).ToListAsync();
+            if (cart.Count() > 0)
+            {
+                foreach (var item in cart)
+                {
+                    _context.Remove(item);
+                    await _context.SaveChangesAsync();
+                }
+                return Json(new { remove = true, status = "Remove successfully !" });
+            }
+            return Json(new { remove = false, status = "An error has occurred !" });
+        }
+
+        public async Task<IActionResult> Checkout(int id)
+        {
+            await _context.Products.ToListAsync();
+            // For Auction Checkout
+            var products = await _context.TransactionDetails.Where(e => e.TransactionId.Equals(id)).Select(e => e.Product).ToListAsync();
+            if (products.Count() > 0)
+            {
+                ViewBag.Id = id;
+                HttpContext.Session.SetString("Products", JsonConvert.SerializeObject(products));
+                return View(products);
+            }
+
+            // For Regular Checkout
+            var user = await _userManager.GetUserAsync(User);
+            products = await _context.Carts.Where(e => e.User.Equals(user)).Select(e => e.Product).ToListAsync();
+            if (products.Count() > 0)
+            {
+                ViewBag.Id = 0;
+                HttpContext.Session.SetString("Products", JsonConvert.SerializeObject(products));
+                return View(products);
+            }
+            return View("Cart");
+        }
+
+        public IActionResult BuyNow(int id)
+        {
+            var product = _context.Products.Find(id);
+            List<Product> products = new List<Product> { product };
+            ViewBag.Id = 0;
+            HttpContext.Session.SetString("Products", JsonConvert.SerializeObject(products));
+            return View("Checkout", products);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ConfirmPayment(int id, Transaction transaction, string Address, string PhoneNumber)
+        {
+            if (id == 0)
+            {
+                transaction.UserId = _userManager.GetUserId(User);
+                _context.Add(transaction);
+                await _context.SaveChangesAsync();
+                var latestTransaction = _context.Transactions.OrderBy(e => e.Id).Last();
+                var products = JsonConvert.DeserializeObject<List<Product>>(HttpContext.Session.GetString("Products"));
+                foreach (var product in products)
+                {
+                    TransactionDetail detail = new() { TransactionId = latestTransaction.Id, ProductId = product.Id, Price = product.DefaultPrice.Value };
+                    _context.Add(detail);
+                    product.Status = false;
+                    _context.Update(product);
+                    await _context.SaveChangesAsync();
+                }
+                latestTransaction.CompletionDate = DateTime.Now;
+                latestTransaction.Status = true;
+                _context.Update(latestTransaction);
+                _context.Carts.RemoveRange(_context.Carts.Where(e => e.UserId.Equals(_userManager.GetUserId(User)) && products.Contains(e.Product)).ToList());
+                await _context.SaveChangesAsync();
+            }
+            else
+            {
+                // Confirm product sold
+                var products = JsonConvert.DeserializeObject<List<Product>>(HttpContext.Session.GetString("Products"));
+                foreach (var product in products)
+                {
+                    product.Status = false;
+                    _context.Update(product);
+                    await _context.SaveChangesAsync();
+                }
+
+                // Confirm transaction complete
+                transaction = _context.Transactions.Find(id);
+                transaction.CompletionDate = DateTime.Now;
+                transaction.Status = true;
+                _context.Update(transaction);
+
+                // Update profile if receive
+                var user = await _userManager.GetUserAsync(User);
+                if (Address != null)
+                {
+                    user.Address = Address;
+                }
+                if (PhoneNumber != null)
+                {
+                    user.PhoneNumber = PhoneNumber;
+                }
+                _context.Update(user);
+                await _context.SaveChangesAsync();
+            }
+            return View();
+        }
 
         [HttpGet]
-        public async Task<IActionResult> Product(int page = 1)
+        public async Task<IActionResult> Product(int page = 1, string show = "all")
         {
-            await _context.Auctions.ToListAsync();
-            var query = _context.Products.Where(e => e.Status);
+            IQueryable<Product> query = null;
+            switch (show)
+            {
+                case "sale":
+                    await _context.Auctions.Where(e => e.Status).ToListAsync();
+                    query = _context.Products.Where(e => e.Status);
+                    break;
+                case "sold":
+                    query = _context.TransactionDetails.Select(e => e.Product);
+                    break;
+                default:
+                case "all":
+                    await _context.Auctions.Where(e => e.Status).ToListAsync();
+                    query = _context.ProductImages.Select(e => e.Product).Distinct();
+                    break;
+            }
             decimal totalSize = await query.CountAsync();
             if (page < 1 || page > Math.Ceiling(totalSize / pageSize))
             {
                 return Redirect("~/Identity/Account/AccessDenied");
             }
             ViewBag.CurrentPage = page;
+            ViewBag.CurrentShow = show;
+            ViewBag.TotalSize = query.Count();
             var products = await query.Skip(pageSize * (page - 1)).Take(pageSize).ToListAsync();
             return View(products);
         }
@@ -95,22 +211,41 @@ namespace OnlineGallery.Controllers
         // GET: Home/ProductDetail/1
         public async Task<IActionResult> ProductDetail(int id)
         {
-            await _context.Auctions.ToListAsync();
+            await _context.Auctions.Where(e => e.Status).ToListAsync();
             Product product = await _context.Products.FindAsync(id);
             return View(product);
         }
 
-        public async Task<IActionResult> Auction(int page = 1)
+        public async Task<IActionResult> Auction(int page = 1, string show = "all")
         {
-            await _context.Products.ToListAsync();
-            await _context.AuctionRecords.ToListAsync();
-            var query = _context.Auctions.Where(e => e.Status);
-            decimal totalSize = await query.CountAsync();
-            if (page < 1 || page > Math.Ceiling(totalSize / pageSize))
+            IQueryable<Auction> query = null;
+            switch (show)
+            {
+                case "upcoming":
+                    query = _context.Auctions.Where(e => e.StartDay.Value.CompareTo(DateTime.Now) > 0);
+                    break;
+                case "inprocess":
+                    query = _context.Auctions.Where(e => e.Status);
+                    break;
+                case "ended":
+                    query = _context.Auctions.Where(e => e.ClosingDay.Value.CompareTo(DateTime.Now) < 0);
+                    break;
+                default:
+                case "all":
+                    query = _context.Auctions.OrderByDescending(e => e.Id);
+                    break;
+            }
+            if (query.Count() == 0)
+            {
+                return View();
+            }
+            ViewBag.CurrentPage = page;
+            ViewBag.CurrentShow = show;
+            ViewBag.TotalSize = query.Count();
+            if (page < 1 || page > Math.Ceiling((decimal)query.Count() / pageSize))
             {
                 return Redirect("~/Identity/Account/AccessDenied");
             }
-            ViewBag.CurrentPage = page;
             var auctions = await query.Skip(pageSize * (page - 1)).Take(pageSize).ToListAsync();
             return View(auctions);
         }
@@ -154,7 +289,8 @@ namespace OnlineGallery.Controllers
         public async Task<IActionResult> Cart()
         {
             var user = await _userManager.GetUserAsync(User);
-            if (user != null)
+            var cart = await _context.Carts.Where(e => e.User.Equals(user)).ToListAsync();
+            if (user != null && cart.Count() > 0)
             {
                 var products = await _context.Carts.Where(e => e.UserId.Equals(user.Id)).Select(e => e.Product).ToListAsync();
                 return View(products);
@@ -223,17 +359,35 @@ namespace OnlineGallery.Controllers
             var auctionList = context.Auctions.ToList();
             foreach (var item in auctionList)
             {
-                if (item.Status == false && item.StartDay.Value.CompareTo(DateTime.Now) < 0)
+                if (!item.Status && item.ClosingDay.Value.CompareTo(DateTime.Now) > 0 && item.StartDay.Value.CompareTo(DateTime.Now) < 0)
                 {
                     item.Status = true;
                     context.Update(item);
                     context.SaveChanges();
                 }
-                if (item.Status == true && item.ClosingDay.Value.CompareTo(DateTime.Now) < 0)
+                if (item.Status && item.ClosingDay.Value.CompareTo(DateTime.Now) < 0)
                 {
+                    // Close auction
                     item.Status = false;
                     context.Update(item);
                     context.SaveChanges();
+
+                    // Check if already have transaction
+                    if (context.TransactionDetails.Any(e => !e.ProductId.Equals(item.ProductId.Value)))
+                    {
+                        var userId = context.AuctionRecords.Where(e => e.AuctionId.Equals(item.Id)).Select(e => e.UserId).FirstOrDefault();
+                        var product = context.Products.Find(item.ProductId);
+                        // Create new transaction
+                        Transaction transaction = new() { UserId = userId, Auctioned = true, CreateDate = DateTime.Now, TotalPrice = product.DefaultPrice.Value };
+                        context.Add(transaction);
+                        context.SaveChanges();
+
+                        // Create detail
+                        int latestId = context.Transactions.OrderBy(e => e.Id).Select(e => e.Id).Last(); // Above transaction id
+                        TransactionDetail detail = new() { TransactionId = latestId, ProductId = product.Id, Price = product.DefaultPrice.Value };
+                        context.Add(detail);
+                        context.SaveChanges();
+                    }
                 }
             }
         }

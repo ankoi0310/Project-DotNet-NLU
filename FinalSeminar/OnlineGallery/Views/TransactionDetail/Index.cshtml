@@ -1,0 +1,65 @@
+﻿@model IEnumerable<TransactionDetail>
+
+@{
+    ViewData["Title"] = "Transaction Detail";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<h1 class="text-center"><i class="fas fa-receipt"></i>&ensp;@ViewData["Title"]</h1>
+
+<div id="view-all">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <table id="transaction-detail" class="table table-bordered table-striped">
+                        <thead>
+                            <tr>
+                                <th class="align-middle text-center">
+                                    @Html.DisplayNameFor(item => item.TransactionId)
+                                </th>
+                                <th class="align-middle text-center">
+                                    @Html.DisplayNameFor(item => item.Product)
+                                </th>
+                                <th class="align-middle text-center">
+                                    @Html.DisplayNameFor(item => item.Price)
+                                </th>
+                                <th class="align-middle text-center">
+                                    Auction Period
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td class="align-middle text-center">
+                                        @item.TransactionId
+                                    </td>
+                                    <td class="align-middle">
+                                        @item.Product.Name
+                                    </td>
+                                    <td class="align-middle text-center">
+                                        @item.Price.ToString("C")
+                                    </td>
+                                    <td class="align-middle text-center font-weight-bolder">
+                                        @if (item.Product.Auction != null)
+                                        {
+                                            <span class="text-success">@item.Product.Auction.Id</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-danger">None</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                <!-- /.card-body -->
+            </div>
+            <!-- /.card -->
+        </div>
+    </div>
+</div>

@@ -229,8 +229,6 @@ F:\NLU\.NET\Project-DotNet-NLU\FinalSeminar\OnlineGallery\obj\Debug\net5.0\Razor
 F:\NLU\.NET\Project-DotNet-NLU\FinalSeminar\OnlineGallery\obj\Debug\net5.0\Razor\Views\Home\ProductDetail.cshtml.g.cs
 F:\NLU\.NET\Project-DotNet-NLU\FinalSeminar\OnlineGallery\obj\Debug\net5.0\Razor\Views\ProductImage\CreateOrUpdate.cshtml.g.cs
 F:\NLU\.NET\Project-DotNet-NLU\FinalSeminar\OnlineGallery\obj\Debug\net5.0\Razor\Views\Product\CreateOrUpdate.cshtml.g.cs
-F:\NLU\.NET\Project-DotNet-NLU\FinalSeminar\OnlineGallery\obj\Debug\net5.0\Razor\Views\AuctionRecord\CreateOrUpdate.cshtml.g.cs
-F:\NLU\.NET\Project-DotNet-NLU\FinalSeminar\OnlineGallery\obj\Debug\net5.0\Razor\Views\AuctionRecord\_ViewAll.cshtml.g.cs
 F:\NLU\.NET\Project-DotNet-NLU\FinalSeminar\OnlineGallery\obj\Debug\net5.0\Razor\Views\Auction\CreateOrUpdate.cshtml.g.cs
 F:\NLU\.NET\Project-DotNet-NLU\FinalSeminar\OnlineGallery\obj\Debug\net5.0\Razor\Views\Auction\_ViewAll.cshtml.g.cs
 F:\NLU\.NET\Project-DotNet-NLU\FinalSeminar\OnlineGallery\bin\Debug\net5.0\DataAnnotationsExtensions.dll
@@ -263,3 +261,7 @@ F:\NLU\.NET\Project-DotNet-NLU\FinalSeminar\OnlineGallery\obj\Debug\net5.0\Razor
 F:\NLU\.NET\Project-DotNet-NLU\FinalSeminar\OnlineGallery\obj\Debug\net5.0\Razor\Views\Auction\CreateAuction.cshtml.g.cs
 F:\NLU\.NET\Project-DotNet-NLU\FinalSeminar\OnlineGallery\obj\Debug\net5.0\Razor\Views\Home\Checkout.cshtml.g.cs
 F:\NLU\.NET\Project-DotNet-NLU\FinalSeminar\OnlineGallery\obj\Debug\net5.0\Razor\Views\Home\Cart.cshtml.g.cs
+F:\NLU\.NET\Project-DotNet-NLU\FinalSeminar\OnlineGallery\obj\Debug\net5.0\Razor\Views\Home\ConfirmPayment.cshtml.g.cs
+F:\NLU\.NET\Project-DotNet-NLU\FinalSeminar\OnlineGallery\obj\Debug\net5.0\Razor\Views\Transaction\Index.cshtml.g.cs
+F:\NLU\.NET\Project-DotNet-NLU\FinalSeminar\OnlineGallery\obj\Debug\net5.0\Razor\Views\TransactionDetail\Index.cshtml.g.cs
+F:\NLU\.NET\Project-DotNet-NLU\FinalSeminar\OnlineGallery\obj\Debug\net5.0\Razor\Views\Transaction\Detail.cshtml.g.cs

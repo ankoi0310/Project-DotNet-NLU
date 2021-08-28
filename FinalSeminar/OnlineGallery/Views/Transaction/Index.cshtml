@@ -1,0 +1,103 @@
+﻿@model IEnumerable<Transaction>
+
+@{
+    ViewData["Title"] = "Transaction";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<h1 class="text-center"><i class="fas fa-file-invoice-dollar"></i>&ensp;@ViewData["Title"]</h1>
+
+<div id="view-all">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <table id="transaction" class="table table-bordered table-striped">
+                        <thead>
+                            <tr>
+                                <th class="align-middle text-center">
+                                    @Html.DisplayNameFor(item => item.Id)
+                                </th>
+                                <th class="align-middle text-center">
+                                    @Html.DisplayNameFor(item => item.User.UserName)
+                                </th>
+                                <th class="align-middle text-center">
+                                    @Html.DisplayNameFor(item => item.CreateDate)
+                                </th>
+                                <th class="align-middle text-center">
+                                    @Html.DisplayNameFor(item => item.CompletionDate)
+                                </th>
+                                <th class="align-middle text-center">
+                                    @Html.DisplayNameFor(item => item.TotalPrice)
+                                </th>
+                                <th class="align-middle text-center">
+                                    @Html.DisplayNameFor(item => item.Auctioned)
+                                </th>
+                                <th class="align-middle text-center">
+                                    @Html.DisplayNameFor(item => item.Status)
+                                </th>
+                                <th class="align-middle text-center">
+                                    Detail
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td class="align-middle text-center">
+                                        @item.Id
+                                    </td>
+                                    <td class="align-middle">
+                                        @item.User.UserName
+                                    </td>
+                                    <td class="align-middle text-center">
+                                        @item.CreateDate.Value.ToString("dd/MM/yyyy HH:mm:ss")
+                                    </td>
+                                    <td class="align-middle text-center">
+                                        @item.CompletionDate.Value.ToString("dd/MM/yyyy HH:mm:ss")
+                                    </td>
+                                    <td class="align-middle text-center">
+                                        @item.TotalPrice.ToString("C")
+                                    </td>
+                                    <td class="align-middle font-weight-bolder text-center">
+                                        @if (item.Auctioned)
+                                        {
+                                            <span class="text-success">True</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-danger">False</span>
+                                        }
+                                    </td>
+                                    <td class="align-middle text-center">
+                                        @if (item.Status)
+                                        {
+                                            <span class="font-weight-bolder text-success">Successfully</span>
+                                        }
+                                        else
+                                        {
+                                            if (item.CompletionDate == null)
+                                            {
+                                                <span class="font-weight-bolder text-danger">Cancelled</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="font-weight-bolder text-warning">Pending</span>
+                                            }
+                                        }
+                                    </td>
+                                    <td class="align-middle text-center">
+                                        <a href="~/Transaction/Detail/@item.Id" class="btn btn-success btn-block"><i class="fas fa-angle-double-right"></i></a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                <!-- /.card-body -->
+            </div>
+            <!-- /.card -->
+        </div>
+    </div>
+</div>

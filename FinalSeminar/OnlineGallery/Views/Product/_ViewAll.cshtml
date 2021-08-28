@@ -107,28 +107,31 @@
                                     }
                                 </td>
                                 <td class="text-center">
-                                    @if (item.Image != null)
+                                    @if (!Tools.IsSold(context, item.Id))
                                     {
-                                        if (item.Auction != null)
+                                        @if (item.Image != null)
                                         {
-                                            <a href="/Home/AuctionDetail/@item.Auction.Id" class="btn btn-dark">Go to Auction</a>
-                                        }
-                                        else
-                                        {
-                                            <a onclick="showInPopup('@Url.Action("CreateOrUpdate", "Product", new { item.Id }, Context.Request.Scheme)', 'Update Product')" class="btn btn-info">Edit</a>
-                                            if (!Tools.CheckGalleryProduct(context, item.Id))
+                                            if (item.Auction != null)
                                             {
-                                                <a onclick="showInPopup('@Url.Action("AddGallery", "ProductImage", new { item.Id }, Context.Request.Scheme)', 'New Gallery')" class="btn btn-warning">Create Gallery</a>
+                                                <a href="/Home/AuctionDetail/@item.Auction.Id" class="btn btn-dark">Go to Auction</a>
                                             }
                                             else
                                             {
-                                                <a onclick="showInPopup('@Url.Action("CreateAuction", "Auction", new { item.Id }, Context.Request.Scheme)', 'New Auction')" class="btn btn-primary">Create Auction</a>
+                                                <a onclick="showInPopup('@Url.Action("CreateOrUpdate", "Product", new { item.Id }, Context.Request.Scheme)', 'Update Product')" class="btn btn-info">Edit</a>
+                                                if (!Tools.CheckGalleryProduct(context, item.Id))
+                                                {
+                                                    <a onclick="showInPopup('@Url.Action("AddGallery", "ProductImage", new { item.Id }, Context.Request.Scheme)', 'New Gallery')" class="btn btn-warning">Create Gallery</a>
+                                                }
+                                                else
+                                                {
+                                                    <a onclick="showInPopup('@Url.Action("CreateAuction", "Auction", new { item.Id }, Context.Request.Scheme)', 'New Auction')" class="btn btn-primary">Create Auction</a>
+                                                }
                                             }
                                         }
-                                    }
-                                    else
-                                    {
-                                        <a onclick="showInPopup('@Url.Action("AddImage", "Product", new { item.Id }, Context.Request.Scheme)', 'Update Product')" class="btn btn-danger">Add Image</a>
+                                        else
+                                        {
+                                            <a onclick="showInPopup('@Url.Action("AddImage", "Product", new { item.Id }, Context.Request.Scheme)', 'Update Product')" class="btn btn-danger">Add Image</a>
+                                        }
                                     }
                                 </td>
                             </tr>

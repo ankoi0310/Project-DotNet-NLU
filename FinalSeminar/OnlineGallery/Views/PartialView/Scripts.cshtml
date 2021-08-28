@@ -26,6 +26,16 @@
             $this.countdown(finalDate, function (event) {
                 $this.html(event.strftime('%Dd : %Hh : %Mm : %Ss'));
             })
-        })
+        });
+
+        $('.cart-remove').on('click', function (e) {
+            e.preventDefault();
+            $(this).closest("tr").remove();
+        });
+
+        $('.cart-remove-all').on('click', function (e) {
+            e.preventDefault();
+            $("#cart-body").html("");
+        });
     });
 </script>

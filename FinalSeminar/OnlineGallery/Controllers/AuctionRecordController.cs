@@ -23,8 +23,8 @@ namespace OnlineGallery.Controllers
         // GET: AuctionRecord/Index
         public async Task<IActionResult> Index()
         {
-            await _context.Products.ToListAsync();
             await _context.Auctions.ToListAsync();
+            await _context.Products.ToListAsync();
             await _context.Users.ToListAsync();
             return View(await _context.AuctionRecords.ToListAsync());
         }

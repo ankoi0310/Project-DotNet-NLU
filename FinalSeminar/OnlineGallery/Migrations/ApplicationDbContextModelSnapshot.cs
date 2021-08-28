@@ -449,6 +449,10 @@ namespace OnlineGallery.Migrations
                         .HasColumnName("Id")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
+                    b.Property<bool>("Auctioned")
+                        .HasColumnType("bit")
+                        .HasColumnName("Auctioned");
+
                     b.Property<DateTime?>("CompletionDate")
                         .HasColumnType("datetime")
                         .HasColumnName("CompletionDate");

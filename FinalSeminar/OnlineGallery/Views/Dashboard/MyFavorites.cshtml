@@ -8,7 +8,6 @@
     ViewData["Title"] = "My Favorites";
     ViewData["MyFavorites"] = "active";
     Layout = "~/Views/Shared/_DashboardLayout.cshtml";
-
 }
 
 <div class="dash-bid-item dashboard-widget mb-40-60">
@@ -43,8 +42,12 @@
                         <span>Price: <strong>@item.DefaultPrice.Value.ToString("C")</strong></span>
                     </h6>
                     <div class="text-center">
-                        <a href="#0" class="btn btn-outline-primary mr-1">Add To Cart</a>
-                        <a href="#0" class="btn btn-outline-success ml-1">Buy Now</a>
+                        <form asp-action="AddToCart" asp-route-id="@item.Id" method="post" onsubmit="return addToCart('@Url.Action("AddToCart", "Home", new { item.Id }, Context.Request.Scheme)');">
+                            <button type="submit" class="btn btn-outline-primary">Add To Cart</button>
+                        </form>
+                        <form asp-action="BuyNow" asp-route-id="@item.Id" method="post">
+                            <button type="submit" class="btn btn-outline-success mt-2">Buy Now</button>
+                        </form>
                     </div>
                 </div>
             </div>

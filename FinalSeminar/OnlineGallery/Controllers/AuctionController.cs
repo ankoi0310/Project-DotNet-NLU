@@ -37,6 +37,7 @@ namespace OnlineGallery.Controllers
             }
             else
             {
+                await _context.Products.ToListAsync();
                 var auction = await _context.Auctions.FindAsync(id);
                 if (auction == null)
                 {

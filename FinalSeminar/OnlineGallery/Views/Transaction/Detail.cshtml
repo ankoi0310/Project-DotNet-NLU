@@ -1,0 +1,57 @@
+﻿@model IEnumerable<TransactionDetail>
+
+@{
+    ViewData["Title"] = "Transaction Detail";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<h1 class="text-center"><i class="fas fa-receipt"></i>&ensp;@ViewData["Title"]</h1>
+
+<div id="view-all">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <table id="detail" class="table table-bordered table-striped">
+                        <thead>
+                            <tr>
+                                <th class="align-middle text-center">
+                                    @Html.DisplayNameFor(item => item.TransactionId)
+                                </th>
+                                <th class="align-middle text-center">
+                                    @Html.DisplayNameFor(item => item.Product)
+                                </th>
+                                <th class="align-middle text-center">
+                                    @Html.DisplayNameFor(item => item.Price)
+                                </th>
+                                <th>
+                                    <a href="~/Transaction" class="btn btn-danger btn-block"><i class="fas fa-angle-double-left"></i></a>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td class="align-middle text-center">
+                                        @item.TransactionId
+                                    </td>
+                                    <td class="align-middle">
+                                        @item.Product.Name
+                                    </td>
+                                    <td class="align-middle">
+                                        @item.Price.ToString("C")
+                                    </td>
+                                    <td>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                <!-- /.card-body -->
+            </div>
+            <!-- /.card -->
+        </div>
+    </div>
+</div>

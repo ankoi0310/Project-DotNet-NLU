@@ -1,5 +1,4 @@
-﻿@using Microsoft.EntityFrameworkCore;
-@using OnlineGallery.Areas.Identity.Data;
+﻿@using OnlineGallery.Areas.Identity.Data;
 @using Microsoft.AspNetCore.Identity;
 @using OnlineGallery.Data;
 
@@ -12,7 +11,7 @@
     var user = await userManager.GetUserAsync(User);
     var featuredList = context.Auctions.Where(e => e.Status).OrderByDescending(key => key.Id).Take(3).OrderBy(key => key.Id);
     var trendingList = context.Products.Where(e => e.Status).ToList().OrderByDescending(key => key.Id).Take(3).OrderBy(key => key.Id);
-    var endingAuctions = await context.Auctions.Where(e => e.ClosingDay.Value.CompareTo(DateTime.Now.AddDays(1)) < 0).ToListAsync();
+    var endingAuctions = context.Auctions.Where(e => e.Status && e.ClosingDay.Value.CompareTo(DateTime.Now.AddDays(1)) < 0).ToList();
 }
 
 <!--============= Banner Section Starts Here =============-->
@@ -103,14 +102,14 @@
             @foreach (var item in featuredList)
             {
                 var lastBidPrice = item.AuctionRecords != null ? item.AuctionRecords.Select(e => e.BidPrice).Last() : item.StartingPrice;
-                var bids = await context.AuctionRecords.Where(e => e.AuctionId == item.Id).CountAsync();
-
+                var bids = context.AuctionRecords.Where(e => e.AuctionId == item.Id).Count();
+                var product = context.Products.Find(item.ProductId);
                 <div class="col-sm-10 col-md-6 col-lg-4">
                     <div class="auction-item-2">
                         <div class="auction-thumb">
-                            <a href="~/Home/AuctionDetail/@item.Id" title="Go to detail"><img src="~/images/@item.Product.Image" alt="car"></a>
-                            <a href="~/Home/AddOrRemoveFavorites/@item.Product.Id" id="like-feature-@(item.Product.Id)" onclick="return jQueryAjaxFavorites('@Url.Action("AddOrRemoveFavorites", "Home", new { item.Product.Id }, Context.Request.Scheme)');" class="rating">
-                                @if (user != null && Tools.IsMyFavorites(context, user.Id, item.Product.Id))
+                            <a href="~/Home/AuctionDetail/@item.Id" title="Go to detail"><img src="~/images/@product.Image" alt="car"></a>
+                            <a href="~/Home/AddOrRemoveFavorites/@product.Id" id="like-feature-@(product.Id)" onclick="return jQueryAjaxFavorites('@Url.Action("AddOrRemoveFavorites", "Home", new { product.Id }, Context.Request.Scheme)');" class="rating">
+                                @if (user != null && Tools.IsMyFavorites(context, user.Id, product.Id))
                                 {
                                     <i class="fas fa-star"></i>
                                 }
@@ -121,8 +120,8 @@
                             </a>
                         </div>
                         <div class="auction-content">
-                            <h6 class="title">
-                                <a href="#0">@item.Product.Name</a>
+                            <h6 class="title font-weight-bolder">
+                                <a href="#0">@product.Name</a>
                             </h6>
                             <div class="bid-area">
                                 <div class="bid-amount">
@@ -140,7 +139,7 @@
                                     </div>
                                     <div class="amount-content">
                                         <div class="current">Buy Now</div>
-                                        <div class="amount">@item.Product.DefaultPrice.Value.ToString("C")</div>
+                                        <div class="amount">@product.DefaultPrice.Value.ToString("C")</div>
                                     </div>
                                 </div>
                             </div>
@@ -164,7 +163,6 @@
         <div class="section-header-3">
             <div class="left d-block">
                 <h2 class="title mb-3">Trending Items</h2>
-                <p>Bid on 1,000’s of vehicles from more than 25 countries</p>
             </div>
             <a href="~/Home/Product" class="normal-button">View All</a>
         </div>
@@ -192,7 +190,7 @@
                                 }
                             </div>
                             <div class="auction-content">
-                                <h5 class="title"><a href="~/Home/ProductDetail/@item.Id">@item.Name</a></h5>
+                                <h5 class="title font-weight-bolder"><a href="~/Home/ProductDetail/@item.Id">@item.Name</a></h5>
                                 <div class="item-information">
                                     <ul>
                                         <li><span>Number</span>@item.Id</li>
@@ -212,7 +210,7 @@
                             @if (item.Auction != null)
                             {
                                 var lastBidPrice = item.Auction.AuctionRecords != null ? item.Auction.AuctionRecords.Select(e => e.BidPrice).Last() : item.Auction.StartingPrice;
-                                var bids = await context.AuctionRecords.Where(e => e.AuctionId == item.Id).CountAsync();
+                                var bids = context.AuctionRecords.Where(e => e.AuctionId == item.Id).Count();
 
                                 <div class="auction-bidding">
                                     <div class="countdown">
@@ -224,7 +222,7 @@
                                         </div>
                                         <div class="amount-content">
                                             <div class="current">Current Bid</div>
-                                            <div class="amount">@lastBidPrice</div>
+                                            <div class="amount">@lastBidPrice.Value.ToString("C")</div>
                                         </div>
                                     </div>
                                     <div class="bids-area">
@@ -237,9 +235,11 @@
                                 <div class="auction-bidding">
                                     <div>
                                         <form asp-action="AddToCart" asp-route-id="@item.Id" method="post" onsubmit="return addToCart('@Url.Action("AddToCart", "Home", new { item.Id }, Context.Request.Scheme)');">
-                                            <button type="submit" class="btn btn-primary text-white mt-4 mb-4">Add To Cart</button>
+                                            <button type="submit" class="btn btn-outline-primary text-white mt-4 mb-4">Add To Cart</button>
                                         </form>
-                                        <button onclick="alert('buy now')" class="btn btn-success text-white">Buy Now</button>
+                                        <form asp-action="BuyNow" asp-route-id="@item.Id" method="post">
+                                            <button type="submit" class="btn btn-outline-success text-white">Buy Now</button>
+                                        </form>
                                     </div>
                                 </div>
                             }
@@ -264,19 +264,20 @@
             <div class="row justify-content-center mb-40-none">
                 @foreach (var item in endingAuctions)
                 {
+                    var product = context.Products.Find(item.ProductId);
                     var lastBidPrice = item.AuctionRecords != null ? item.AuctionRecords.Select(e => e.BidPrice).Last() : item.StartingPrice;
 
-                    var bids = await context.AuctionRecords.Where(e => e.AuctionId == item.Id).CountAsync();
+                    var bids = context.AuctionRecords.Where(e => e.AuctionId == item.Id).Count();
                     <div class="col-lg-6">
                         <div class="auction-item-3">
                             <div class="auction-thumb">
-                                <a href="~/Home/AuctionDetail/@item.Id"><img src="~/images/@item.Product.Image" alt="ending"></a>
+                                <a href="~/Home/AuctionDetail/@item.Id"><img src="~/images/@product.Image" alt="ending"></a>
 
                             </div>
                             <div class="auction-content">
-                                <h6 class="title">
-                                    <a href="~/Home/ProductDetail/@item.ProductId">
-                                        @item.Product.Name
+                                <h6 class="title font-weight-bolder">
+                                    <a href="~/Home/ProductDetail/@product.Id">
+                                        @product.Name
                                     </a>
                                 </h6>
                                 <div class="bid-amount">
