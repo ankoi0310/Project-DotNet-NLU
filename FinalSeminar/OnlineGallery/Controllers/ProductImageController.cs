@@ -82,8 +82,12 @@ namespace OnlineGallery.Controllers
                         await _context.SaveChangesAsync();
                     }
                     var product = await _context.Products.FindAsync(productImage.ProductId);
-                    product.Status = true;
-                    await _context.SaveChangesAsync();
+                    var soldProduct = await _context.TransactionDetails.Select(e => e.Product).ToListAsync();
+                    if (!soldProduct.Contains(product))
+                    {
+                        product.Status = true;
+                        await _context.SaveChangesAsync();
+                    }
                 }
                 else
                 {

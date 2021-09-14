@@ -72,7 +72,7 @@ namespace OnlineGallery.Models
         // Get the winner
         public static bool IsWinner(ApplicationDbContext context, AuctionRecord record)
         {
-            if (!record.Auction.Status && record.Auction.ClosingDay.Value.CompareTo(DateTime.Now) < 0)
+            if ((!record.Auction.Status && record.Auction.ClosingDay.Value.CompareTo(DateTime.Now) < 0))
             {
                 var lastRecord = context.AuctionRecords.Where(e => e.AuctionId.Value.Equals(record.AuctionId.Value)).OrderBy(e => e.Id).Last();
                 return lastRecord.Equals(record);
@@ -98,5 +98,97 @@ namespace OnlineGallery.Models
             var soldProducts = context.TransactionDetails.Select(e => e.ProductId).ToList();
             return soldProducts.Contains(id);
         }
+
+        // Check if product has been sold before auction end
+        public static bool IsSoldBeforeAuctionEnd(ApplicationDbContext context, int id)
+        {
+            context.Transactions.ToList();
+            var product = context.Products.Find(id);
+            if (!product.Status)
+            {
+                var transaction = context.TransactionDetails.Where(e => e.ProductId.Equals(id)).Select(e => e.Transaction).FirstOrDefault();
+                return !transaction.Auctioned;
+            }
+            return false;
+        }
+
+        // Check if that user buy that product
+        public static bool IsUserSold(ApplicationDbContext context, string userId, int productId)
+        {
+            var transactionId = context.TransactionDetails.Where(e => e.ProductId.Equals(productId)).Select(e => e.TransactionId).FirstOrDefault();
+            var transaction = context.Transactions.Find(transactionId);
+            return transaction.UserId.Equals(userId);
+        }
+
+        // OVERVIEW PER MONTH
+        // Get registration amount
+        public static int GetTotalRegistration(ApplicationDbContext context)
+            => context.UserRoles.Where(e => e.RoleId.Equals("2")).Count();
+
+        // Get this month sales
+        public static decimal GetThisMonthSales(ApplicationDbContext context)
+            => context.TransactionDetails.Where(e =>
+                e.Transaction.CompletionDate.Value.Month.Equals(DateTime.Now.Month) &&
+                e.Transaction.CompletionDate.Value.Year.Equals(DateTime.Now.Year) && e.Transaction.Status
+            ).Count();
+
+        // Get last month sales
+        public static decimal GetLastMonthSales(ApplicationDbContext context)
+            => context.TransactionDetails.Where(e => 
+                e.Transaction.CompletionDate.Value.Month.Equals(DateTime.Now.Month - 1) &&
+                e.Transaction.CompletionDate.Value.Year.Equals(DateTime.Now.Year) && e.Transaction.Status
+            ).Count();
+
+        // Get this month profit
+        public static decimal GetThisMonthProfit(ApplicationDbContext context)
+            => context.Transactions.Where(e =>
+                e.CompletionDate.Value.Month.Equals(DateTime.Now.Month) &&
+                e.CompletionDate.Value.Year.Equals(DateTime.Now.Year) && e.Status
+            ).Select(e => e.TotalPrice).Sum();
+
+        // Get last month profit
+        public static decimal GetLastMonthProfit(ApplicationDbContext context)
+            => context.Transactions.Where(e =>
+                e.CompletionDate.Value.Month.Equals(DateTime.Now.Month - 1) &&
+                e.CompletionDate.Value.Year.Equals(DateTime.Now.Year) && e.Status
+            ).Select(e => e.TotalPrice).Sum();
+
+        // Get sales rate
+        public static decimal GetSalesRateCompareLastMonth(ApplicationDbContext context)
+        {
+            var thisMonthSales = GetThisMonthSales(context);
+            var lastMonthSales = GetLastMonthSales(context);
+            if (lastMonthSales == 0)
+            {
+                if (thisMonthSales > 0)
+                {
+                    return 100;
+                }
+                if (thisMonthSales == 0)
+                {
+                    return 0;
+                }
+            }
+            return thisMonthSales * 100 / lastMonthSales;
+        }
+
+        // Get profit rate
+        public static decimal GetProfitRateCompareLastMonth(ApplicationDbContext context)
+        {
+            var thisMonthProfit = GetThisMonthProfit(context);
+            var lastMonthProfit = GetLastMonthProfit(context);
+            if (lastMonthProfit == 0)
+            {
+                if (thisMonthProfit > 0)
+                {
+                    return 100;
+                }
+                if (thisMonthProfit == 0)
+                {
+                    return 0;
+                }
+            }
+            return thisMonthProfit * 100 / lastMonthProfit;
+        }
     }
-}   
+}

@@ -84,7 +84,7 @@
                                     @if (item.StartDay.Value.CompareTo(DateTime.Now) > 0)
                                     {
                                         <a onclick="showInPopup('@Url.Action("CreateOrUpdate", "Auction", new { item.Id }, Context.Request.Scheme)', 'Update Auction')" class="btn btn-info">Edit</a>
-                                        <form asp-action="Delete" asp-route-id="@item.Id" onsubmit="return jQueryAjaxSoldConfirm(this);" class="d-inline">
+                                        <form asp-action="Delete" asp-route-id="@item.Id" onsubmit="return jQueryAjaxDelete(this);" class="d-inline">
                                             <input type="submit" value="Delete" class="btn btn-warning" />
                                         </form>
                                     }

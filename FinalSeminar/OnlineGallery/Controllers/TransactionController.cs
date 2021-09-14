@@ -26,6 +26,8 @@ namespace OnlineGallery.Controllers
         public async Task<IActionResult> Detail(int id)
         {
             await _context.Products.ToListAsync();
+            await _context.Auctions.ToListAsync();
+            await _context.Transactions.ToListAsync();
             var detail = await _context.TransactionDetails.Where(e => e.TransactionId.Equals(id)).ToListAsync();
             return View(detail);
         }

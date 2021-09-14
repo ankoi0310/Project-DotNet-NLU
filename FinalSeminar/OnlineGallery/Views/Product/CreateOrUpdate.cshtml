@@ -27,7 +27,7 @@
         <form asp-action="CreateOrUpdate" enctype="multipart/form-data" asp-route-id="@Model.Id" onsubmit="setValue(); return jQueryAjaxPost(this);" autocomplete="off">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <input type="hidden" asp-for="Id" value="@Model.Id" />
-            <input type="hidden" asp-for="Status" value="false" />
+            <input type="hidden" asp-for="Status" value="@Model.Status" />
             <div class="row">
                 <div class="col-9">
                     <div class="form-group">
@@ -49,7 +49,7 @@
                         </select>
                     </div>
                 </div>
-                @if (Model.Id == 0)
+                @if (Model.Id == 0 || Model.Image == null)
                 {
                     <div class="col-7">
                         <div class="form-group">
@@ -69,7 +69,8 @@
                     <div class="col-4">
                         <div class="form-group">
                             <label class="control-label">Replace Image</label>
-                            <input asp-for="FileImage" class="form-control" accept="image/*" value="@Model.Image" />
+                            <input asp-for="FileImage" class="form-control" accept="image/*" />
+                            <input type="hidden" asp-for="Image" class="form-control" value="@Model.Image" />
                         </div>
                     </div>
                 }
@@ -84,7 +85,13 @@
                 <div class="col-4">
                     <div class="form-group">
                         <label asp-for="Condition" class="control-label"></label>
-                        <input asp-for="Condition" class="form-control" />
+                        <select class="form-select form-control" aria-label="Select Condition" asp-for="Condition">
+                            <option value="">Select condition</option>
+                            <option value="New">New</option>
+                            <option value="Used">Used</option>
+                            <option value="Part only">Part only</option>
+                            <option value="Broken">Broken</option>
+                        </select>
                     </div>
                 </div>
                 <div class="col-3">
@@ -96,7 +103,13 @@
                 <div class="col-3">
                     <div class="form-group">
                         <label asp-for="Color" class="control-label"></label>
-                        <input asp-for="Color" class="form-control" />
+                        <select class="form-select form-control" aria-label="Select Condition" asp-for="Color">
+                            <option value="">Select color</option>
+                            @foreach (var color in System.Enum.GetNames(typeof(System.Drawing.KnownColor)))
+                            {
+                                <option value="@color">@color</option>
+                            }
+                        </select>
                     </div>
                 </div>
             </div>
@@ -104,15 +117,37 @@
                 <div class="col-4">
                     <div class="form-group">
                         <label asp-for="Fuel" class="control-label"></label>
-                        <input asp-for="Fuel" class="form-control" />
-
+                        <select class="form-select form-control" aria-label="Select Fuel" asp-for="Fuel">
+                            <option value="">Select fuel</option>
+                            <option value="Gas">Gas</option>
+                            <option value="Diesel">Diesel</option>
+                            <option value="Electrical">Electrical</option>
+                            <option value="LPG">LPG</option>
+                            <option value="Hydrogen">Hydrogen</option>
+                            <option value="Bioethanol">Bioethanol</option>
+                            <option value="CNG">CNG</option>
+                            <option value="Biodiesel">Biodiesel</option>
+                            <option value="Propane (C3H8)">Propane (C3H8)</option>
+                            <option value="Water (H2O)">Water (H2O)</option>
+                        </select>
                     </div>
                 </div>
                 <div class="col-4">
                     <div class="form-group">
                         <label asp-for="Engine" class="control-label"></label>
-                        <input asp-for="Engine" class="form-control" />
-
+                        <select class="form-select form-control" aria-label="Select Engine" asp-for="Engine">
+                            <option value="">Select engine</option>
+                            <option value="I4">I4</option>
+                            <option value="I6">I6</option>
+                            <option value="V6">V6</option>
+                            <option value="V8">V8</option>
+                            <option value="V10">V10</option>
+                            <option value="V12">V12</option>
+                            <option value="Boxer">Boxer</option>
+                            <option value="W12">W12</option>
+                            <option value="W16">W16</option>
+                            <option value="W32">W32</option>
+                        </select>
                     </div>
                 </div>
                 <div class="col-2">
@@ -125,7 +160,14 @@
                 <div class="col-2">
                     <div class="form-group">
                         <label asp-for="Doors" class="control-label"></label>
-                        <input asp-for="Doors" class="form-control" />
+                        <select class="form-select form-control" aria-label="Select Condition" asp-for="Doors">
+                            <option value="">Select doors</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                        </select>
                     </div>
                 </div>
             </div>

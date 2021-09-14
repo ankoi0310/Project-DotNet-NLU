@@ -24,6 +24,9 @@
                                 <th class="align-middle text-center">
                                     @Html.DisplayNameFor(item => item.Price)
                                 </th>
+                                <th class="align-middle text-center">
+                                    Auction Period
+                                </th>
                                 <th>
                                     <a href="~/Transaction" class="btn btn-danger btn-block"><i class="fas fa-angle-double-left"></i></a>
                                 </th>
@@ -39,8 +42,18 @@
                                     <td class="align-middle">
                                         @item.Product.Name
                                     </td>
-                                    <td class="align-middle">
+                                    <td class="align-middle text-center">
                                         @item.Price.ToString("C")
+                                    </td>
+                                    <td class="align-middle text-center font-weight-bolder">
+                                        @if (item.Transaction.Auctioned)
+                                        {
+                                            <span class="text-success">@item.Product.Auction.Id</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-danger">None</span>
+                                        }
                                     </td>
                                     <td>
                                     </td>

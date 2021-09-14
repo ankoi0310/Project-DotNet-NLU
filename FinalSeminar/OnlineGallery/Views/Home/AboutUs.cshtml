@@ -1,5 +1,14 @@
-﻿@{
+﻿@using OnlineGallery.Data;
+
+@inject ApplicationDbContext context
+
+@{
     ViewData["Title"] = "About Us";
+
+    var products = context.Products.Count();
+    var bids = context.AuctionRecords.Select(e => e.BidPrice.Value).Sum();
+    var auctions = context.Auctions.Count();
+    var experts = context.AuctionRecords.Select(e => e.UserId).Distinct().Count();
 }
 
 <!--============= Hero Section Starts Here =============-->
@@ -58,15 +67,15 @@
             <div class="col-sm-6 col-lg-3">
                 <div class="counter-item">
                     <h3 class="counter-header">
-                        <span class="title counter">62</span><span class="title">M</span>
+                        <span class="title counter">@products</span>
                     </h3>
-                    <p>ITEMS AUCTIONED</p>
+                    <p>PRODUCTS</p>
                 </div>
             </div>
             <div class="col-sm-6 col-lg-3">
                 <div class="counter-item">
                     <h3 class="counter-header">
-                        <span>$</span><span class="title counter">887</span><span class="title">M</span>
+                        <span class="title counter">@bids.ToString("C")</span>
                     </h3>
                     <p>IN SECURE BIDS</p>
                 </div>
@@ -74,7 +83,7 @@
             <div class="col-sm-6 col-lg-3">
                 <div class="counter-item">
                     <h3 class="counter-header">
-                        <span class="title counter">63</span><span class="title">M</span>
+                        <span class="title counter">@auctions</span>
                     </h3>
                     <p>ITEMS AUCTIONED</p>
                 </div>
@@ -82,7 +91,7 @@
             <div class="col-sm-6 col-lg-3">
                 <div class="counter-item">
                     <h3 class="counter-header">
-                        <span>0</span><span class="title counter">5</span><span class="title">K</span>
+                        <span class="title counter">@experts</span>
                     </h3>
                     <p>AUCTION EXPERTS</p>
                 </div>
@@ -138,7 +147,7 @@
                                     <img src="~/assets/images/overview/04.png" alt="overview">
                                 </div>
                                 <div class="content">
-                                    <h6 class="title">Supports Multiple Currency</h6>
+                                    <h6 class="title">Supports Email Contact</h6>
                                 </div>
                             </div>
                         </div>
@@ -197,11 +206,11 @@
                 <div class="team-inner">
                     <div class="team-thumb">
                         <a href="#0">
-                            <img src="~/images/avatar.jpg" alt="team">
+                            <img src="~/assets/images/team/avatar.jpg" alt="team">
                         </a>
                     </div>
                     <div class="team-content">
-                        <h6 class="title"><a href="#0">Huynh Van Huu An</a></h6>
+                        <h6 class="title"><a href="https://19130003.tk">Huỳnh Văn Hữu Ân</a></h6>
                         <ul class="social">
                             <li>
                                 <a href="https://www.facebook.com/ankoi0310"><i class="fab fa-facebook-f"></i></a>

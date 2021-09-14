@@ -30,6 +30,7 @@
         var lastBidPrice = item.AuctionRecords.Select(e => e.BidPrice.Value).Last();
         var product = context.Products.Find(item.ProductId);
         var transactionId = context.TransactionDetails.Where(e => e.Product.Equals(product)).Select(e => e.TransactionId).FirstOrDefault();
+        var transaction = context.Transactions.Find(transactionId);
         <div class="col-sm-10 col-md-6">
             <div class="auction-item-2">
                 <div class="auction-thumb">
@@ -49,12 +50,26 @@
                     <h6 class="title">
                         <a href="~/Home/AuctionDetail/@item.Id" class="font-weight-bolder">@product.Name</a>
                         <span>Time: @item.StartDay.Value.ToString("dd/MM/yyyy") - @item.ClosingDay.Value.ToString("dd/MM/yyyy")</span>
+                        <br />
                         <span>Last Price: @lastBidPrice.ToString("C")</span>
                     </h6>
                     <div class="text-center">
-                        <form action="~/Home/Checkout/@transactionId" method="post">
-                            <button type="submit" class="btn btn-outline-success">Checkout <i class="fas fa-hand-holding-usd"></i></button>
-                        </form>
+                        @if (transaction.Status)
+                        {
+                            <button class="btn btn-success font-weight-bolder disabled">Transaction completed</button>
+                        }
+                        else if (!product.Status)
+                        {
+                    <button class="btn btn-danger font-weight-bolder disabled">The product has been sold</button>
+                        }
+                        else
+                        {
+                            {
+                                <form action="~/Home/Checkout/@transactionId" method="post">
+                                    <button type="submit" class="btn btn-outline-success">Checkout <i class="fas fa-hand-holding-usd"></i></button>
+                                </form>
+                            }
+                        }
                     </div>
                 </div>
             </div>

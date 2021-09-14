@@ -79,12 +79,12 @@ jQueryAjaxFavorites = (url) => {
                     if (res.like) {
                         $("#like-feature-" + res.id).html("<i class='fas fa-star'></i>");
                         $("#like-" + res.id).html("<i class='fas fa-star'></i>");
-                        $("#like-detail-" + res.id).html("<span><i class='fas fa-star'></i>&nbsp;You have liked this</span>");
+                        $("#like-detail-" + res.id).html("<span  class='font-weight-bolder'>You have liked this <i class='fas fa-star'></i></span>");
                         $.notify(res.status, { globalPosition: "top center", className: "success" });
                     } else {
                         $("#like-feature-" + res.id).html("<i class='far fa-star'></i>")
                         $("#like-" + res.id).html("<i class='far fa-star'></i>")
-                        $("#like-detail-" + res.id).html("<span><i class='far fa-star'></i>&nbsp;Add to your favorites</span>");
+                        $("#like-detail-" + res.id).html("<span  class='font-weight-bolder'>Add to your favorites <i class='far fa-star'></i></span>");
                         $.notify(res.status, { globalPosition: "top center", className: "error" });
                     }
                 } else {
@@ -205,6 +205,32 @@ removeFromCart = (url) => {
                 var $cartbody = $("#cart-body").html().replace(/\s/g, '');
                 if ($cartbody == "") {
                     $("#cart-body").html("<tr><td colspan='4' class='align-middle text-center'>No data available in table</td></tr>");
+                }
+            },
+            error: function (err) {
+                console.log(err);
+            }
+        })
+    } catch (e) {
+        console.log(e);
+    }
+
+    return false;
+}
+
+sendMail = (form) => {
+    try {
+        $.ajax({
+            type: "POST",
+            url: form.action,
+            data: new FormData(form),
+            contentType: false,
+            processData: false,
+            success: function (res) {
+                if (res.isValid) {
+                    $.notify(res.status, { globalPosition: "top center", className: "success" });
+                } else {
+                    $.notify(res.status, { globalPosition: "top center", className: "error" });
                 }
             },
             error: function (err) {

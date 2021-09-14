@@ -21,6 +21,7 @@ namespace OnlineGallery.Controllers
         {
             await _context.Products.ToListAsync();
             await _context.Auctions.ToListAsync();
+            await _context.Transactions.ToListAsync();
             return View(await _context.TransactionDetails.ToListAsync());
         }
     }

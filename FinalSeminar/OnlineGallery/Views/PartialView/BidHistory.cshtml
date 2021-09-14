@@ -1,0 +1,95 @@
+﻿@model IEnumerable<AuctionRecord>
+
+<div class="history-wrapper">
+    <div class="item">
+        <h5 class="title">Bid History</h5>
+        <div class="history-table-area">
+            <table class="history-table">
+                <thead>
+                    <tr>
+                        <th>Bidder</th>
+                        <th>Email</th>
+                        <th>Time</th>
+                        <th>Unit Price</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null)
+                    {
+                        @foreach (var item in Model)
+                        {
+                            <tr class="d-none">
+                                <td data-history="bidder">
+                                    <div class="user-info">
+                                        <div class="thumb">
+                                            @if (item.User.Image == null)
+                                            {
+                                                <img src="~/images/blank-avatar.jpg" alt="history">
+                                            }
+                                            else
+                                            {
+                                                <img src="~/images/@item.User.Image" alt="history">
+                                            }
+                                        </div>
+                                        <div class="content">
+                                            @item.User.FullName
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>@item.User.Email</td>
+                                <td>@item.Day.Value.ToString("dd/MM/yyyy HH:mm:ss")</td>
+                                <td>@item.BidPrice.Value.ToString("C")</td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr><td colspan="4" class="text-center">Auction list is currently empty</td></tr>
+                    }
+                </tbody>
+            </table>
+            <div class="text-center mb-3 mt-4" id="load-more">
+                <a href="#0" onclick="loadMore()" class="button-3">Load More</a>
+            </div>
+            <div class="text-center mb-3 mt-4 d-none" id="collapse">
+                <a href="#0" onclick="collapse()" class="button-3">Collapse</a>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    var row = 4;
+    var tbody = document.querySelector("#history tbody");
+    var trList = tbody.getElementsByTagName("tr");
+    var btnMore = document.getElementById("load-more");
+    var btnCollapse = document.getElementById("collapse");
+
+    loadMore = () => {
+        for (var i = 0; i < row; i++) {
+            if (i < trList.length) {
+                if (trList[i].classList.contains("d-none")) {
+                    trList[i].classList.remove("d-none");
+                }
+            }
+        }
+        if (row >= trList.length) {
+            btnMore.classList.add("d-none");
+            btnCollapse.classList.remove("d-none");
+        }
+        else {
+            row += 5;
+        }
+    }
+
+    collapse = () => {
+        row = 4;
+        for (var i = row + 1; i < trList.length; i++) {
+            trList[i].classList.add("d-none");
+        }
+        btnMore.classList.remove("d-none");
+        btnCollapse.classList.add("d-none");
+        row += 5;
+    }
+
+    loadMore();
+</script>

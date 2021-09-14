@@ -10,7 +10,7 @@
 @{
     ViewData["Title"] = "Auction";
 
-    int pageSize = 3;
+    const int pageSize = 9;
     var user = await userManager.GetUserAsync(User);
     var featuredList = context.Auctions.Where(e => e.Status).OrderByDescending(key => key.Id).Take(3).OrderBy(key => key.Id);
 }
@@ -294,6 +294,16 @@ else
                                                 <div class="amount">@lastBidPrice.Value.ToString("C")</div>
                                             </div>
                                         </div>
+                                    </div>
+                                    <div class="text-center" style="padding-top: 20px; margin: 6px 0 0 0;">
+                                        @if (product.Status)
+                                        {
+                                            <h5 class="align-middle font-weight-bolder text-danger pt-1">Auction Has Ended</h5>
+                                        }
+                                        else
+                                        {
+                                            <h5 class="align-middle font-weight-bolder text-danger pt-1">Product Has Been Sold</h5>
+                                        }
                                     </div>
                                 }
                             </div>

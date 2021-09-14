@@ -37,8 +37,9 @@ namespace OnlineGallery.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var user = await _userManager.GetUserAsync(HttpContext.User);
-
+            await _context.Products.ToListAsync();
+            await _context.Auctions.ToListAsync();
+            await _context.Transactions.ToListAsync();
             return View();
         }
 
@@ -120,21 +121,12 @@ namespace OnlineGallery.Controllers
 
         public async Task<IActionResult> WinningBids()
         {
-            List<Auction> auctions = new();
+            await _context.Products.ToListAsync();
             await _context.Auctions.ToListAsync();
+            await _context.AuctionRecords.ToListAsync();
             var userId = _userManager.GetUserId(User);
-            var auctionRecords = await _context.AuctionRecords.Where(e => e.UserId.Equals(userId)).ToListAsync();
-            if (auctionRecords == null)
-            {
-                return View();
-            }
-            foreach (var record in auctionRecords)
-            {
-                if (Tools.IsWinner(_context, record))
-                {
-                    auctions.Add(record.Auction);
-                }
-            }
+            var transactions = await _context.Transactions.Where(e => e.UserId.Equals(userId) && e.Auctioned).ToListAsync();
+            var auctions = await _context.TransactionDetails.Where(e => transactions.Contains(e.Transaction)).Select(e => e.Product.Auction).ToListAsync();
             return View(auctions);
         }
 

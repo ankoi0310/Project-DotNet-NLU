@@ -1,6 +1,26 @@
-﻿@{
+﻿@using OnlineGallery.Data;
+
+@inject ApplicationDbContext context
+
+@{
     ViewData["Title"] = "Dashboard";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
+
+
+    // Transaction Overview
+    var details = context.TransactionDetails.ToList().TakeLast(4);
+
+    // Total Products
+    var products = context.TransactionDetails.Where(e => e.Transaction.Status).Count();
+
+    // Total Profit
+    var profits = context.TransactionDetails.Select(e => e.Price).Sum();
+
+    // Total Products In Cart
+    var productsInCart = context.Carts.Count();
+
+    // Total Favorite Products
+    var favoriteProducts = context.MyFavorites.Count();
 }
 
 <div class="content">
@@ -10,45 +30,49 @@
                 <div class="card">
                     <div class="card-header border-0">
                         <div class="d-flex justify-content-between">
-                            <h3 class="card-title">Online Store Visitors</h3>
+                            <h3 class="card-title">Product Overview</h3>
                             <a href="javascript:void(0);">View Report</a>
                         </div>
                     </div>
                     <div class="card-body">
                         <div class="d-flex">
                             <p class="d-flex flex-column">
-                                <span class="text-bold text-lg">820</span>
-                                <span>Visitors Over Time</span>
+                                <span class="text-bold text-lg">@products</span>
+                                <span>Sold Over Time</span>
                             </p>
                             <p class="ml-auto d-flex flex-column text-right">
-                                <span class="text-success">
-                                    <i class="fas fa-arrow-up"></i> 12.5%
-                                </span>
-                                <span class="text-muted">Since last week</span>
+                                @if (Tools.GetSalesRateCompareLastMonth(context) > 10)
+                                {
+                                    <span class="text-success">
+                                        <i class="fas fa-arrow-up"></i> @Math.Round(Tools.GetSalesRateCompareLastMonth(context), 2)%
+                                    </span>
+                                }
+                                else if (Tools.GetSalesRateCompareLastMonth(context) > 0)
+                                {
+                                    <span class="text-warning">
+                                        <i class="fas fa-arrow-up"></i> @Math.Round(Tools.GetSalesRateCompareLastMonth(context), 2)%
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="text-danger">
+                                        <i class="fas fa-arrow-down"></i> @Math.Round(Tools.GetSalesRateCompareLastMonth(context), 2)%
+                                    </span>
+                                }
+                                <span class="text-muted">Since last month</span>
                             </p>
                         </div>
                         <!-- /.d-flex -->
 
                         <div class="position-relative mb-4">
-                            <canvas id="visitors-chart" height="200"></canvas>
-                        </div>
-
-                        <div class="d-flex flex-row justify-content-end">
-                            <span class="mr-2">
-                                <i class="fas fa-square text-primary"></i> This Week
-                            </span>
-
-                            <span>
-                                <i class="fas fa-square text-gray"></i> Last Week
-                            </span>
+                            <canvas id="product-chart" height="200"></canvas>
                         </div>
                     </div>
                 </div>
                 <!-- /.card -->
-
                 <div class="card">
                     <div class="card-header border-0">
-                        <h3 class="card-title">Products</h3>
+                        <h3 class="card-title">Transactions</h3>
                         <div class="card-tools">
                             <a href="#" class="btn btn-tool btn-sm">
                                 <i class="fas fa-download"></i>
@@ -63,31 +87,34 @@
                             <thead>
                                 <tr>
                                     <th>Name</th>
-                                    <th>Price</th>
-                                    <th>Status</th>
-                                    <th>More</th>
+                                    <th class="align-middle text-center">Price</th>
+                                    <th class="align-middle text-center">Created</th>
+                                    <th class="align-middle text-center">Sold</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr>
-                                    <td>
-                                        <img src="~/admin/dist/img/default-150x150.png" alt="Product 1" class="img-circle img-size-32 mr-2">
-                                        Some Product
-                                    </td>
-                                    <td>$13 USD</td>
-                                    <td>
-                                        <small class="text-success mr-1">
-                                            <i class="fas fa-arrow-up"></i>
-                                            12%
-                                        </small>
-                                        12,000 Sold
-                                    </td>
-                                    <td>
-                                        <a href="#" class="text-muted">
-                                            <i class="fas fa-info-circle"></i>
-                                        </a>
-                                    </td>
-                                </tr>
+                                @foreach (var item in details)
+                                {
+                                    <tr>
+                                        <td>@item.Product.Name</td>
+                                        <td class="align-middle text-center">@item.Product.DefaultPrice.Value.ToString("C")</td>
+                                        <td class="align-middle text-center">@item.Transaction.CreateDate.Value.ToString("dd/MM/yyyy HH:mm:ss")</td>
+                                        <td class="align-middle text-center">
+                                            @if (!item.Transaction.Status)
+                                            {
+                                                <span class="font-weight-bolder text-warning">Pending</span>
+                                            }
+                                            else if (item.Transaction.Auctioned)
+                                            {
+                                                <span class="font-weight-bolder text-primary">Auctioned</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="font-weight-bolder text-danger">Regular</span>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
                             </tbody>
                         </table>
                     </div>
@@ -99,45 +126,49 @@
                 <div class="card">
                     <div class="card-header border-0">
                         <div class="d-flex justify-content-between">
-                            <h3 class="card-title">Sales</h3>
+                            <h3 class="card-title">Profits Overview</h3>
                             <a href="javascript:void(0);">View Report</a>
                         </div>
                     </div>
                     <div class="card-body">
                         <div class="d-flex">
                             <p class="d-flex flex-column">
-                                <span class="text-bold text-lg">$18,230.00</span>
-                                <span>Sales Over Time</span>
+                                <span class="text-bold text-lg">@profits.ToString("C")</span>
+                                <span>Profits Over Time</span>
                             </p>
                             <p class="ml-auto d-flex flex-column text-right">
-                                <span class="text-success">
-                                    <i class="fas fa-arrow-up"></i> 33.1%
-                                </span>
+                                @if (Tools.GetProfitRateCompareLastMonth(context) > 10)
+                                {
+                                    <span class="text-success">
+                                        <i class="fas fa-arrow-up"></i> @Math.Round(Tools.GetProfitRateCompareLastMonth(context), 2)%
+                                    </span>
+                                }
+                                else if (Tools.GetProfitRateCompareLastMonth(context) > 0)
+                                {
+                                    <span class="text-warning">
+                                        <i class="fas fa-arrow-up"></i> @Math.Round(Tools.GetProfitRateCompareLastMonth(context), 2)%
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="text-danger">
+                                        <i class="fas fa-arrow-down"></i> @Math.Round(Tools.GetProfitRateCompareLastMonth(context), 2)%
+                                    </span>
+                                }
                                 <span class="text-muted">Since last month</span>
                             </p>
                         </div>
                         <!-- /.d-flex -->
 
                         <div class="position-relative mb-4">
-                            <canvas id="sales-chart" height="200"></canvas>
-                        </div>
-
-                        <div class="d-flex flex-row justify-content-end">
-                            <span class="mr-2">
-                                <i class="fas fa-square text-primary"></i> This year
-                            </span>
-
-                            <span>
-                                <i class="fas fa-square text-gray"></i> Last year
-                            </span>
+                            <canvas id="profit-chart" height="200"></canvas>
                         </div>
                     </div>
                 </div>
                 <!-- /.card -->
-
                 <div class="card">
                     <div class="card-header border-0">
-                        <h3 class="card-title">Online Store Overview</h3>
+                        <h3 class="card-title">Overview</h3>
                         <div class="card-tools">
                             <a href="#" class="btn btn-sm btn-tool">
                                 <i class="fas fa-download"></i>
@@ -148,39 +179,39 @@
                         </div>
                     </div>
                     <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center border-bottom mb-3">
-                            <p class="text-success text-xl">
-                                <i class="ion ion-ios-refresh-empty"></i>
+                        <div class="d-flex justify-content-between align-items-center mb-0">
+                            <p class="text-danger text-xl">
+                                <i class="fas fa-users"></i>
                             </p>
                             <p class="d-flex flex-column text-right">
                                 <span class="font-weight-bold">
-                                    <i class="ion ion-android-arrow-up text-success"></i> 12%
+                                    @Tools.GetTotalRegistration(context)
                                 </span>
-                                <span class="text-muted">CONVERSION RATE</span>
+                                <span class="text-muted">USERS</span>
                             </p>
                         </div>
                         <!-- /.d-flex -->
                         <div class="d-flex justify-content-between align-items-center border-bottom mb-3">
                             <p class="text-warning text-xl">
-                                <i class="ion ion-ios-cart-outline"></i>
+                                <i class="fas fa-shopping-cart"></i>
                             </p>
                             <p class="d-flex flex-column text-right">
                                 <span class="font-weight-bold">
-                                    <i class="ion ion-android-arrow-up text-warning"></i> 0.8%
+                                    @productsInCart
                                 </span>
-                                <span class="text-muted">SALES RATE</span>
+                                <span class="text-muted">PRODUCTS IN CART</span>
                             </p>
                         </div>
                         <!-- /.d-flex -->
-                        <div class="d-flex justify-content-between align-items-center mb-0">
-                            <p class="text-danger text-xl">
-                                <i class="ion ion-ios-people-outline"></i>
+                        <div class="d-flex justify-content-between align-items-center border-bottom mb-3">
+                            <p class="text-success text-xl">
+                                <i class="fas fa-star"></i>
                             </p>
                             <p class="d-flex flex-column text-right">
                                 <span class="font-weight-bold">
-                                    <i class="ion ion-android-arrow-down text-danger"></i> 1%
+                                    @favoriteProducts
                                 </span>
-                                <span class="text-muted">REGISTRATION RATE</span>
+                                <span class="text-muted">FAVORITE PRODUCTS</span>
                             </p>
                         </div>
                         <!-- /.d-flex -->

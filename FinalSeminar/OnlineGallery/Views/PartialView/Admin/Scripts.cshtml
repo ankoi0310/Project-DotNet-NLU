@@ -1,4 +1,23 @@
-﻿<script src="~/lib/jquery/dist/jquery.min.js"></script>
+﻿@using OnlineGallery.Data
+
+@inject ApplicationDbContext context
+
+@{
+    var products = new int[12];
+    var profits = new decimal[12];
+    var transactions = context.Transactions.ToList();
+    foreach (var transaction in transactions)
+    {
+        if (transaction.Status)
+        {
+            var month = transaction.CompletionDate.Value.Month;
+            products[month - 1] += context.TransactionDetails.Where(e => e.Transaction.Equals(transaction)).Count();
+            profits[month - 1] += transaction.TotalPrice;
+        }
+    }
+}
+
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-U1DAWAznBHeqEIlVSCgzq+c9gqGAJn5c/t99JyeKa9xxaYpSvHU5awsuZVVFIhvj" crossorigin="anonymous"></script>
 
 <!-- DataTables -->
@@ -55,8 +74,9 @@
             "pageLength": 2,
             "ordering": false,
             "columnDefs": [
-                { "width": "4%", "targets": 0 },
-                { "width": "9.5%", "targets": 3 }
+                { "width": "5%", "targets": 0 },
+                { "width": "35%", "targets": 1 },
+                { "width": "10%", "targets": 3 }
             ]
         });
         $("#auction").DataTable({
@@ -89,7 +109,11 @@
             "pageLength": 10,
             "ordering": false,
             "columnDefs": [
-                //{ "width": "12%", "targets": 7 }
+                { "width": "5%", "targets": 0 },
+                { "width": "12%", "targets": 2 },
+                { "width": "12%", "targets": 3 },
+                { "width": "9%", "targets": 6 },
+                { "width": "8%", "targets": 7 }
             ]
         });
         $("#detail").DataTable({
@@ -100,7 +124,9 @@
             "ordering": false,
             "columnDefs": [
                 { "width": "15%", "targets": 0 },
-                { "width": "12%", "targets": 3 }
+                { "width": "20%", "targets": 2 },
+                { "width": "15%", "targets": 3 },
+                { "width": "10%", "targets": 4 }
             ]
         });
         $("#transaction-detail").DataTable({
@@ -121,7 +147,144 @@
 <script src="~/admin/dist/js/adminlte.js"></script>
 
 <!-- OPTIONAL SCRIPTS -->
-<script src="~/admin/plugins/chart.js/Chart.min.js"></script>
+@*<script src="~/admin/plugins/chart.js/Chart.min.js"></script>*@
 <script src="~/admin/dist/js/demo.js"></script>
 <script src="~/admin/dist/js/pages/dashboard3.js"></script>
 <script src="~/js/site.js" asp-append-version="true"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.5.1/dist/chart.min.js"></script>
+
+<script>
+    'use strict'
+
+    var ticksStyle = {
+        fontColor: '#495057',
+        fontStyle: 'bold'
+    }
+
+    var mode = 'index'
+    var intersect = true
+
+    var dataProducts = [];
+    @foreach (var item in products)
+    {
+        @:dataProducts.push(@item);
+    }
+    var $productChart = $('#product-chart')
+    var productChart = new Chart($productChart, {
+        data: {
+            labels: ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'],
+            datasets: [
+                {
+                    label: "Products",
+                    type: 'line',
+                    data: dataProducts,
+                    backgroundColor: 'transparent',
+                    borderColor: '#007bff',
+                    pointBorderColor: '#007bff',
+                    pointBackgroundColor: '#007bff',
+                    fill: false
+                    // pointHoverBackgroundColor: '#007bff',
+                    // pointHoverBorderColor    : '#007bff'
+                }
+            ]
+        },
+        options: {
+            maintainAspectRatio: false,
+            tooltips: {
+                mode: mode,
+                intersect: intersect
+            },
+            hover: {
+                mode: mode,
+                intersect: intersect
+            },
+            legend: {
+                display: false
+            },
+            scales: {
+                yAxes: [{
+                    // display: false,
+                    gridLines: {
+                        display: true,
+                        lineWidth: '4px',
+                        color: 'rgba(0, 0, 0, .2)',
+                        zeroLineColor: 'transparent'
+                    },
+                    ticks: $.extend({
+                        beginAtZero: true,
+                        suggestedMax: 500
+                    }, ticksStyle)
+                }],
+                xAxes: [{
+                    display: true,
+                    gridLines: {
+                        display: false
+                    },
+                    ticks: ticksStyle
+                }]
+            }
+        }
+    });
+
+    var dataProfits = [];
+    @foreach (var item in profits)
+    {
+        @:dataProfits.push(@item);
+    }
+    var $profitChart = $('#profit-chart')
+    var profitChart = new Chart($profitChart, {
+        data: {
+            labels: ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'],
+            datasets: [
+                {
+                    label: "Profits",
+                    type: 'line',
+                    data: dataProfits,
+                    backgroundColor: 'transparent',
+                    borderColor: '#007bff',
+                    pointBorderColor: '#007bff',
+                    pointBackgroundColor: '#007bff',
+                    fill: false
+                    // pointHoverBackgroundColor: '#007bff',
+                    // pointHoverBorderColor    : '#007bff'
+                }
+            ]
+        },
+        options: {
+            maintainAspectRatio: false,
+            tooltips: {
+                mode: mode,
+                intersect: intersect
+            },
+            hover: {
+                mode: mode,
+                intersect: intersect
+            },
+            legend: {
+                display: false
+            },
+            scales: {
+                yAxes: [{
+                    // display: false,
+                    gridLines: {
+                        display: true,
+                        lineWidth: '4px',
+                        color: 'rgba(0, 0, 0, .2)',
+                        zeroLineColor: 'transparent'
+                    },
+                    ticks: $.extend({
+                        beginAtZero: true,
+                        suggestedMax: 500
+                    }, ticksStyle)
+                }],
+                xAxes: [{
+                    display: true,
+                    gridLines: {
+                        display: false
+                    },
+                    ticks: ticksStyle
+                }]
+            }
+        }
+    });
+</script>

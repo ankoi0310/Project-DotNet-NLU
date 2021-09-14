@@ -77,15 +77,10 @@ namespace OnlineGallery.Controllers
                     {
                         if (product.FileImage != null)
                         {
-                            var oldProduct = _context.Products.Find(id);
-                            Tools.RemoveImage(_webHostEnvironment, oldProduct.Image);
-                            oldProduct.Image = Tools.SaveImage(_webHostEnvironment, product.FileImage);
-                            _context.Update(oldProduct);
+                            Tools.RemoveImage(_webHostEnvironment, product.Image);
+                            product.Image = Tools.SaveImage(_webHostEnvironment, product.FileImage);
                         }
-                        else
-                        {
-                            _context.Update(product);
-                        }
+                        _context.Update(product);
                         await _context.SaveChangesAsync();
                     }
                     catch (DbUpdateConcurrencyException)
@@ -119,16 +114,16 @@ namespace OnlineGallery.Controllers
         }
 
         // POST: Product/Sold/5
-        [HttpPost, ActionName("Sold")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> SoldConfirmed(int id)
-        {
-            var product = await _context.Products.FindAsync(id);
-            product.Status = false;
-            _context.Update(product);
-            await _context.SaveChangesAsync();
-            return Json(new { html = Helper.RenderRazorViewString(this, "_ViewAll", _context.Products.ToList()) });
-        }
+        //[HttpPost, ActionName("Sold")]
+        //[ValidateAntiForgeryToken]
+        //public async Task<IActionResult> SoldConfirmed(int id)
+        //{
+        //    var product = await _context.Products.FindAsync(id);
+        //    product.Status = false;
+        //    _context.Update(product);
+        //    await _context.SaveChangesAsync();
+        //    return Json(new { html = Helper.RenderRazorViewString(this, "_ViewAll", _context.Products.ToList()) });
+        //}
 
         private bool ProductExists(int id)
         {

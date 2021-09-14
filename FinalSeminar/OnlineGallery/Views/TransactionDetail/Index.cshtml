@@ -43,7 +43,7 @@
                                         @item.Price.ToString("C")
                                     </td>
                                     <td class="align-middle text-center font-weight-bolder">
-                                        @if (item.Product.Auction != null)
+                                        @if (item.Transaction.Auctioned)
                                         {
                                             <span class="text-success">@item.Product.Auction.Id</span>
                                         }

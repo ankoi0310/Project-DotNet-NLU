@@ -3,15 +3,34 @@
 @using OnlineGallery.Data;
 
 @inject ApplicationDbContext context
-@inject UserManager<ApplicationUser> userManager 
+@inject UserManager<ApplicationUser> userManager
 
 @{
     ViewData["Title"] = "Dashboard";
     ViewData["Dashboard"] = "active";
     Layout = "~/Views/Shared/_DashboardLayout.cshtml";
 
-    var user = await userManager.GetUserAsync(Context.User);
-    var count = context.MyFavorites.Where(e => e.UserId == user.Id).Count();
+    var userId = userManager.GetUserId(User);
+
+    // Count favorite products
+    int favorites = context.MyFavorites.Where(e => e.UserId.Equals(userId)).Count();
+
+    var records = context.AuctionRecords.Where(e => e.UserId.Equals(userId)).ToList();
+    // Count the auction participated
+    int actives = records.Select(e => e.AuctionId).Distinct().Count();
+
+    // Count winning bid
+    int winningBids = context.Transactions.Where(e => e.UserId.Equals(userId) && e.Auctioned).Count();
+
+    // Cart
+    var cart = context.Carts.Where(e => e.UserId.Equals(userId)).Select(e => e.Product).ToList();
+
+    var transactionIds = context.Transactions.Where(e => e.UserId.Equals(userId)).Select(e => e.Id).ToList();
+    // Pending Transaction
+    var pending = context.TransactionDetails.Where(e => transactionIds.Contains(e.TransactionId) && !e.Transaction.Status).ToList();
+
+    // Completed Transaction
+    var completed = context.TransactionDetails.Where(e => transactionIds.Contains(e.TransactionId) && e.Transaction.Status).ToList();
 }
 
 <div class="dashboard-widget mb-40">
@@ -25,7 +44,7 @@
                     <img src="~/assets/images/dashboard/01.png" alt="dashboard">
                 </div>
                 <div class="content">
-                    <h2 class="title"><span class="counter">80</span></h2>
+                    <h2 class="title"><span class="counter">@actives</span></h2>
                     <h6 class="info">Active Bids</h6>
                 </div>
             </div>
@@ -36,7 +55,7 @@
                     <img src="~/assets/images/dashboard/02.png" alt="dashboard">
                 </div>
                 <div class="content">
-                    <h2 class="title"><span class="counter">15</span></h2>
+                    <h2 class="title"><span class="counter">@winningBids</span></h2>
                     <h6 class="info">Items Won</h6>
                 </div>
             </div>
@@ -47,7 +66,7 @@
                     <img src="~/assets/images/dashboard/03.png" alt="dashboard">
                 </div>
                 <div class="content">
-                    <h2 class="title"><span class="counter">@count</span></h2>
+                    <h2 class="title"><span class="counter">@favorites</span></h2>
                     <h6 class="info">Favorites</h6>
                 </div>
             </div>
@@ -55,224 +74,120 @@
     </div>
 </div>
 <div class="dashboard-widget">
-    <h5 class="title mb-10">Purchasing</h5>
+    <h5 class="title mb-10">Current Record</h5>
     <div class="dashboard-purchasing-tabs">
         <ul class="nav-tabs nav">
             <li>
-                <a href="#current" class="active" data-toggle="tab">Current</a>
+                <a href="#cart" class="active" data-toggle="tab">Cart</a>
             </li>
             <li>
-                <a href="#pending" data-toggle="tab">Pending</a>
+                <a href="#pending-transaction" data-toggle="tab">Pending Transaction</a>
             </li>
             <li>
-                <a href="#history" data-toggle="tab">History</a>
+                <a href="#completed-transaction" data-toggle="tab">Completed Transaction</a>
             </li>
         </ul>
         <div class="tab-content">
-            <div class="tab-pane show active fade" id="current">
-                <table class="purchasing-table">
+            <div class="tab-pane show active fade" id="cart">
+                <table class="purchasing-table table-bordered">
                     <thead>
-                    <th>Item</th>
-                    <th>Bid Price</th>
-                    <th>Highest Bid</th>
-                    <th>Lowest Bid</th>
-                    <th>Expires</th>
+                        <tr>
+                            <th class="align-middle text-center">Id</th>
+                            <th class="align-middle text-center">Name</th>
+                            <th class="align-middle text-center">Price</th>
+                            <th class="align-middle text-center">Status</th>
+                        </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td data-purchase="item">2018 Hyundai Sonata</td>
-                            <td data-purchase="bid price">$1,775.00</td>
-                            <td data-purchase="highest bid">$1,775.00</td>
-                            <td data-purchase="lowest bid">$1,400.00</td>
-                            <td data-purchase="expires">7/2/2021</td>
-                        </tr>
-                        <tr>
-                            <td data-purchase="item">2018 Hyundai Sonata</td>
-                            <td data-purchase="bid price">$1,775.00</td>
-                            <td data-purchase="highest bid">$1,775.00</td>
-                            <td data-purchase="lowest bid">$1,400.00</td>
-                            <td data-purchase="expires">7/2/2021</td>
-                        </tr>
-                        <tr>
-                            <td data-purchase="item">2018 Hyundai Sonata</td>
-                            <td data-purchase="bid price">$1,775.00</td>
-                            <td data-purchase="highest bid">$1,775.00</td>
-                            <td data-purchase="lowest bid">$1,400.00</td>
-                            <td data-purchase="expires">7/2/2021</td>
-                        </tr>
-                        <tr>
-                            <td data-purchase="item">2018 Hyundai Sonata</td>
-                            <td data-purchase="bid price">$1,775.00</td>
-                            <td data-purchase="highest bid">$1,775.00</td>
-                            <td data-purchase="lowest bid">$1,400.00</td>
-                            <td data-purchase="expires">7/2/2021</td>
-                        </tr>
-                        <tr>
-                            <td data-purchase="item">2018 Hyundai Sonata</td>
-                            <td data-purchase="bid price">$1,775.00</td>
-                            <td data-purchase="highest bid">$1,775.00</td>
-                            <td data-purchase="lowest bid">$1,400.00</td>
-                            <td data-purchase="expires">7/2/2021</td>
-                        </tr>
-                        <tr>
-                            <td data-purchase="item">2018 Hyundai Sonata</td>
-                            <td data-purchase="bid price">$1,775.00</td>
-                            <td data-purchase="highest bid">$1,775.00</td>
-                            <td data-purchase="lowest bid">$1,400.00</td>
-                            <td data-purchase="expires">7/2/2021</td>
-                        </tr>
-                        <tr>
-                            <td data-purchase="item">2018 Hyundai Sonata</td>
-                            <td data-purchase="bid price">$1,775.00</td>
-                            <td data-purchase="highest bid">$1,775.00</td>
-                            <td data-purchase="lowest bid">$1,400.00</td>
-                            <td data-purchase="expires">7/2/2021</td>
-                        </tr>
-                        <tr>
-                            <td data-purchase="item">2018 Hyundai Sonata</td>
-                            <td data-purchase="bid price">$1,775.00</td>
-                            <td data-purchase="highest bid">$1,775.00</td>
-                            <td data-purchase="lowest bid">$1,400.00</td>
-                            <td data-purchase="expires">7/2/2021</td>
-                        </tr>
-                        <tr>
-                            <td data-purchase="item">2018 Hyundai Sonata</td>
-                            <td data-purchase="bid price">$1,775.00</td>
-                            <td data-purchase="highest bid">$1,775.00</td>
-                            <td data-purchase="lowest bid">$1,400.00</td>
-                            <td data-purchase="expires">7/2/2021</td>
-                        </tr>
+                        @if (cart.Count() > 0)
+                        {
+                            foreach (var item in cart)
+                            {
+                                <tr>
+                                    <td class="align-middle text-center">@item.Id</td>
+                                    <td class="pl-1" style="width: 300px;">@item.Name</td>
+                                    <td class="align-middle text-center">@item.DefaultPrice.Value.ToString("C")</td>
+                                    @if (item.Status)
+                                    {
+                                        <td class="align-middle text-center text-success font-weight-bolder"><span>On sale</span></td>
+                                    }
+                                    else
+                                    {
+                                        <td class="align-middle text-center text-danger font-weight-bolder">Sold</td>
+                                    }
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="4" class="align-middle text-center">No data available in table</td>
+                            </tr>
+                        }
                     </tbody>
                 </table>
             </div>
-            <div class="tab-pane show fade" id="pending">
-                <table class="purchasing-table">
+            <div class="tab-pane show fade" id="pending-transaction">
+                <table class="purchasing-table table-bordered">
                     <thead>
-                    <th>Item</th>
-                    <th>Bid Price</th>
-                    <th>Highest Bid</th>
-                    <th>Lowest Bid</th>
-                    <th>Expires</th>
+                        <tr>
+                            <th class="align-middle text-center">Id</th>
+                            <th class="align-middle text-center">Product</th>
+                            <th class="align-middle text-center">Price</th>
+                            <th class="align-middle text-center">Created</th>
+                        </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td data-purchase="item">2018 Hyundai Sonata</td>
-                            <td data-purchase="bid price">$1,775.00</td>
-                            <td data-purchase="highest bid">$1,775.00</td>
-                            <td data-purchase="lowest bid">$1,400.00</td>
-                            <td data-purchase="expires">7/2/2021</td>
-                        </tr>
-                        <tr>
-                            <td data-purchase="item">2018 Hyundai Sonata</td>
-                            <td data-purchase="bid price">$1,775.00</td>
-                            <td data-purchase="highest bid">$1,775.00</td>
-                            <td data-purchase="lowest bid">$1,400.00</td>
-                            <td data-purchase="expires">7/2/2021</td>
-                        </tr>
-                        <tr>
-                            <td data-purchase="item">2018 Hyundai Sonata</td>
-                            <td data-purchase="bid price">$1,775.00</td>
-                            <td data-purchase="highest bid">$1,775.00</td>
-                            <td data-purchase="lowest bid">$1,400.00</td>
-                            <td data-purchase="expires">7/2/2021</td>
-                        </tr>
-                        <tr>
-                            <td data-purchase="item">2018 Hyundai Sonata</td>
-                            <td data-purchase="bid price">$1,775.00</td>
-                            <td data-purchase="highest bid">$1,775.00</td>
-                            <td data-purchase="lowest bid">$1,400.00</td>
-                            <td data-purchase="expires">7/2/2021</td>
-                        </tr>
-                        <tr>
-                            <td data-purchase="item">2018 Hyundai Sonata</td>
-                            <td data-purchase="bid price">$1,775.00</td>
-                            <td data-purchase="highest bid">$1,775.00</td>
-                            <td data-purchase="lowest bid">$1,400.00</td>
-                            <td data-purchase="expires">7/2/2021</td>
-                        </tr>
-                        <tr>
-                            <td data-purchase="item">2018 Hyundai Sonata</td>
-                            <td data-purchase="bid price">$1,775.00</td>
-                            <td data-purchase="highest bid">$1,775.00</td>
-                            <td data-purchase="lowest bid">$1,400.00</td>
-                            <td data-purchase="expires">7/2/2021</td>
-                        </tr>
-                        <tr>
-                            <td data-purchase="item">2018 Hyundai Sonata</td>
-                            <td data-purchase="bid price">$1,775.00</td>
-                            <td data-purchase="highest bid">$1,775.00</td>
-                            <td data-purchase="lowest bid">$1,400.00</td>
-                            <td data-purchase="expires">7/2/2021</td>
-                        </tr>
-                        <tr>
-                            <td data-purchase="item">2018 Hyundai Sonata</td>
-                            <td data-purchase="bid price">$1,775.00</td>
-                            <td data-purchase="highest bid">$1,775.00</td>
-                            <td data-purchase="lowest bid">$1,400.00</td>
-                            <td data-purchase="expires">7/2/2021</td>
-                        </tr>
+                        @if (pending.Count() > 0)
+                        {
+                            foreach (var item in pending)
+                            {
+                                <tr>
+                                    <td class="align-middle text-center">@item.TransactionId</td>
+                                    <td class="pl-1" style="width: 300px;">@item.Product.Name</td>
+                                    <td class="align-middle text-center">@item.Price.ToString("C")</td>
+                                    <td class="align-middle text-center">@item.Transaction.CreateDate.Value.ToString("dd/MM/yyyy HH:mm:ss")</td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="4" class="align-middle text-center">No data available in table</td>
+                            </tr>
+                        }
                     </tbody>
                 </table>
             </div>
-            <div class="tab-pane show fade" id="history">
-                <table class="purchasing-table">
+            <div class="tab-pane show fade" id="completed-transaction">
+                <table class="purchasing-table table-bordered">
                     <thead>
-                    <th>Item</th>
-                    <th>Bid Price</th>
-                    <th>Highest Bid</th>
-                    <th>Lowest Bid</th>
-                    <th>Expires</th>
+                        <tr>
+                            <th class="align-middle text-center">Id</th>
+                            <th class="align-middle text-center">Product</th>
+                            <th class="align-middle text-center">Price</th>
+                            <th class="align-middle text-center">Date</th>
+                        </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td data-purchase="item">2018 Hyundai Sonata</td>
-                            <td data-purchase="bid price">$1,775.00</td>
-                            <td data-purchase="highest bid">$1,775.00</td>
-                            <td data-purchase="lowest bid">$1,400.00</td>
-                            <td data-purchase="expires">7/2/2021</td>
-                        </tr>
-                        <tr>
-                            <td data-purchase="item">2018 Hyundai Sonata</td>
-                            <td data-purchase="bid price">$1,775.00</td>
-                            <td data-purchase="highest bid">$1,775.00</td>
-                            <td data-purchase="lowest bid">$1,400.00</td>
-                            <td data-purchase="expires">7/2/2021</td>
-                        </tr>
-                        <tr>
-                            <td data-purchase="item">2018 Hyundai Sonata</td>
-                            <td data-purchase="bid price">$1,775.00</td>
-                            <td data-purchase="highest bid">$1,775.00</td>
-                            <td data-purchase="lowest bid">$1,400.00</td>
-                            <td data-purchase="expires">7/2/2021</td>
-                        </tr>
-                        <tr>
-                            <td data-purchase="item">2018 Hyundai Sonata</td>
-                            <td data-purchase="bid price">$1,775.00</td>
-                            <td data-purchase="highest bid">$1,775.00</td>
-                            <td data-purchase="lowest bid">$1,400.00</td>
-                            <td data-purchase="expires">7/2/2021</td>
-                        </tr>
-                        <tr>
-                            <td data-purchase="item">2018 Hyundai Sonata</td>
-                            <td data-purchase="bid price">$1,775.00</td>
-                            <td data-purchase="highest bid">$1,775.00</td>
-                            <td data-purchase="lowest bid">$1,400.00</td>
-                            <td data-purchase="expires">7/2/2021</td>
-                        </tr>
-                        <tr>
-                            <td data-purchase="item">2018 Hyundai Sonata</td>
-                            <td data-purchase="bid price">$1,775.00</td>
-                            <td data-purchase="highest bid">$1,775.00</td>
-                            <td data-purchase="lowest bid">$1,400.00</td>
-                            <td data-purchase="expires">7/2/2021</td>
-                        </tr>
-                        <tr>
-                            <td data-purchase="item">2018 Hyundai Sonata</td>
-                            <td data-purchase="bid price">$1,775.00</td>
-                            <td data-purchase="highest bid">$1,775.00</td>
-                            <td data-purchase="lowest bid">$1,400.00</td>
-                            <td data-purchase="expires">7/2/2021</td>
-                        </tr>
+                        @if (completed.Count() > 0)
+                        {
+                            foreach (var item in completed)
+                            {
+                                <tr>
+                                    <td class="align-middle text-center">@item.TransactionId</td>
+                                    <td class="pl-1" style="width: 300px;">@item.Product.Name</td>
+                                    <td class="align-middle text-center">@item.Price.ToString("C")</td>
+                                    <td class="align-middle text-center">@item.Transaction.CompletionDate.Value.ToString("dd/MM/yyyy HH:mm:ss")</td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="4" class="align-middle text-center">No data available in table</td>
+                            </tr>
+                        }
                     </tbody>
                 </table>
             </div>

@@ -11,7 +11,7 @@
 @{
     ViewData["Title"] = "Product";
 
-    int pageSize = 3;
+    const int pageSize = 9;
     var user = await userManager.GetUserAsync(User);
     var featuredList = context.Products.Where(e => e.Status).OrderByDescending(key => key.Id).Take(3).OrderBy(key => key.Id);
 }
@@ -36,7 +36,7 @@
     <section class="featured-auction-section padding-bottom mt--240 mt-lg--440 pos-rel">
         <div class="container">
             <div class="section-header cl-white mw-100 left-style">
-                <h3 class="title">There Are Currently No Auctions!</h3>
+                <h3 class="title">There Are Currently No Product Here!</h3>
             </div>
         </div>
     </section>
@@ -87,10 +87,10 @@ else
                                 </h6>
                                 <div class="text-center">
                                     <form asp-action="AddToCart" asp-route-id="@item.Id" method="post" onsubmit="return addToCart('@Url.Action("AddToCart", "Home", new { item.Id }, Context.Request.Scheme)');">
-                                        <button type="submit" class="btn btn-outline-primary">Add To Cart</button>
+                                        <button type="submit" class="btn btn-outline-primary font-weight-bolder">Add To Cart <i class="fas fa-cart-plus"></i></button>
                                     </form>
                                     <form asp-action="BuyNow" asp-route-id="@item.Id" method="post">
-                                        <button type="submit" class="btn btn-outline-success mt-2">Buy Now</button>
+                                        <button type="submit" class="btn btn-outline-success font-weight-bolder mt-2">Buy Now <i class="fas fa-hand-holding-usd"></i></button>
                                     </form>
                                 </div>
                             </div>
@@ -157,15 +157,15 @@ else
                                     @if (item.Status)
                                     {
                                         <form asp-action="AddToCart" asp-route-id="@item.Id" method="post" onsubmit="return addToCart('@Url.Action("AddToCart", "Home", new { item.Id }, Context.Request.Scheme)');">
-                                            <button type="submit" class="btn btn-outline-primary">Add To Cart</button>
+                                            <button type="submit" class="btn btn-outline-primary font-weight-bolder">Add To Cart <i class="fas fa-cart-plus"></i></button>
                                         </form>
-                                        <form asp-action="AddToCart" asp-route-id="@item.Id" method="post" onsubmit="return addToCart('@Url.Action("AddToCart", "Home", new { item.Id }, Context.Request.Scheme)');">
-                                            <button type="submit" class="btn btn-outline-success mt-2">Buy Now</button>
+                                        <form asp-action="BuyNow" asp-route-id="@item.Id" method="post">
+                                            <button type="submit" class="btn btn-outline-success font-weight-bolder mt-2">Buy Now <i class="fas fa-hand-holding-usd"></i></button>
                                         </form>
                                     }
                                     else
                                     {
-                                        <h1 class="font-weight-bolder text-danger pt-1">Sold</h1>
+                                        <h1 class="font-weight-bolder text-center text-danger pt-1">Sold</h1>
                                     }
                                 </div>
                             </div>

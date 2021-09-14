@@ -55,7 +55,10 @@
                                         @item.CreateDate.Value.ToString("dd/MM/yyyy HH:mm:ss")
                                     </td>
                                     <td class="align-middle text-center">
-                                        @item.CompletionDate.Value.ToString("dd/MM/yyyy HH:mm:ss")
+                                        @if (item.CompletionDate.HasValue)
+                                        {
+                                            <span>@item.CompletionDate.Value.ToString("dd/MM/yyyy HH:mm:ss")</span>
+                                        }
                                     </td>
                                     <td class="align-middle text-center">
                                         @item.TotalPrice.ToString("C")
@@ -77,9 +80,9 @@
                                         }
                                         else
                                         {
-                                            if (item.CompletionDate == null)
+                                            if (item.CompletionDate != null)
                                             {
-                                                <span class="font-weight-bolder text-danger">Cancelled</span>
+                                                <span class="font-weight-bolder text-danger">Failed</span>
                                             }
                                             else
                                             {

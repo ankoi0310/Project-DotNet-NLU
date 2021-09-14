@@ -69,12 +69,15 @@ namespace OnlineGallery.Areas.Identity.Pages.Account
             public string ConfirmPassword { get; set; }
         }
 
-        public async Task OnGetAsync(string returnUrl = null)
+        public async Task<IActionResult> OnGetAsync(string returnUrl = null)
         {
+            if (_userManager.GetUserId(User) != null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
             ReturnUrl = returnUrl;
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
-            _logger.LogInformation("User logged out.");
-            await _signInManager.SignOutAsync();
+            return Page();
         }
 
         public async Task<IActionResult> OnPostAsync(string returnUrl = null)

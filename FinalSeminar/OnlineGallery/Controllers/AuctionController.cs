@@ -62,7 +62,6 @@ namespace OnlineGallery.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateOrUpdate(int id, Auction auction)
         {
-            
             if (auction.StartDay.Value.CompareTo(DateTime.Now) < 0)
             {
                 ModelState.AddModelError("DateError", "- The starting day cannot be earlier than today.");
@@ -108,7 +107,7 @@ namespace OnlineGallery.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var auction = await _context.Auctions.FindAsync(id);
-            _context.Update(auction);
+            _context.Remove(auction);
             await _context.SaveChangesAsync();
             return Json(new { html = Helper.RenderRazorViewString(this, "_ViewAll", _context.Auctions.ToList()) });
         }

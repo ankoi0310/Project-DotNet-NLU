@@ -265,3 +265,4 @@ F:\NLU\.NET\Project-DotNet-NLU\FinalSeminar\OnlineGallery\obj\Debug\net5.0\Razor
 F:\NLU\.NET\Project-DotNet-NLU\FinalSeminar\OnlineGallery\obj\Debug\net5.0\Razor\Views\Transaction\Index.cshtml.g.cs
 F:\NLU\.NET\Project-DotNet-NLU\FinalSeminar\OnlineGallery\obj\Debug\net5.0\Razor\Views\TransactionDetail\Index.cshtml.g.cs
 F:\NLU\.NET\Project-DotNet-NLU\FinalSeminar\OnlineGallery\obj\Debug\net5.0\Razor\Views\Transaction\Detail.cshtml.g.cs
+F:\NLU\.NET\Project-DotNet-NLU\FinalSeminar\OnlineGallery\obj\Debug\net5.0\Razor\Views\PartialView\BidHistory.cshtml.g.cs

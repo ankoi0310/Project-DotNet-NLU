@@ -13,7 +13,11 @@
     int count = 0;
     int totalPrice = 0;
     var user = await userManager.GetUserAsync(User);
-    var last = context.Transactions.OrderBy(e => e.Id).Last();
+    var last = new Transaction();
+    if (context.Transactions.Count() > 0)
+    {
+        last = context.Transactions.OrderBy(e => e.Id).Last();
+    }
 }
 
 <!--============= Hero Section Starts Here =============-->
@@ -44,7 +48,7 @@
                         <span class="font-weight-bolder">Invoice No</span>
                     </div>
                     <div class="col-3 pl-4">
-                        <span>:&nbsp;<i>@(ViewBag.Id == 0 ? last.Id + 1 : last.Id)</i></span>
+                        <span>:&nbsp;<i>@(ViewBag.Id == 0 ? last.Id + 1 : ViewBag.Id)</i></span>
                     </div>
                 </div>
                 <div class="row">

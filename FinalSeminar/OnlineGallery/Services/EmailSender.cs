@@ -33,5 +33,16 @@ namespace OnlineGallery.Services
             };
             return client.SendMailAsync(new MailMessage(_emailSettings.Username, email, subject, message) { IsBodyHtml = true });
         }
+
+        public Task SendEmailContactAsync(string email, string subject, string message)
+        {
+            var client = new SmtpClient(_emailSettings.Host, _emailSettings.Port)
+            {
+                UseDefaultCredentials = true,
+                Credentials = new NetworkCredential(_emailSettings.Username, _emailSettings.Password),
+                EnableSsl = _emailSettings.EnableSSL
+            };
+            return client.SendMailAsync(new MailMessage(email, _emailSettings.Username, subject, message) { IsBodyHtml = true });
+        }
     }
 }

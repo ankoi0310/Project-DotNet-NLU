@@ -55,8 +55,13 @@ namespace OnlineGallery.Areas.Identity.Pages.Account
             public bool RememberMe { get; set; }
         }
 
-        public async Task OnGetAsync(string returnUrl = null)
+        public async Task<IActionResult> OnGetAsync(string returnUrl = null)
         {
+            if (_userManager.GetUserId(User) != null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
             if (!string.IsNullOrEmpty(ErrorMessage))
             {
                 ModelState.AddModelError(string.Empty, ErrorMessage);
@@ -70,9 +75,11 @@ namespace OnlineGallery.Areas.Identity.Pages.Account
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
 
             ReturnUrl = returnUrl;
+
+            return Page();
         }
 
-        public async Task<IActionResult> OnPostAsync()
+        public async Task<IActionResult> OnPostAsync(string returnUrl = null)
         {
 
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
@@ -86,7 +93,7 @@ namespace OnlineGallery.Areas.Identity.Pages.Account
                 if (result.Succeeded)
                 {
                     var roles = await _userManager.GetRolesAsync(user);
-                    string returnUrl = roles.Contains("Admin") ? Url.Content("~/Admin") : Url.Content("~/Home");
+                    returnUrl = roles.Contains("Admin") ? Url.Content("~/Admin") : returnUrl ?? Url.Content("~/");
                     _logger.LogInformation("User logged in.");
                     return LocalRedirect(returnUrl);
                 }

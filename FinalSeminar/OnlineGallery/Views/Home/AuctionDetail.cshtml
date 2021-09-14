@@ -16,7 +16,7 @@
     var user = await userManager.GetUserAsync(User);
 
     var lastBidPrice = context.AuctionRecords.Any(e => e.AuctionId.Equals(Model.Id)) ? Model.AuctionRecords.Select(e => e.BidPrice).Last() : Model.StartingPrice;
-    
+
     var totalBidders = await context.AuctionRecords.Where(e => e.Auction.Equals(Model)).Select(e => e.UserId).Distinct().CountAsync();
     var totalWatchings = await context.MyFavorites.Where(e => e.ProductId == Model.ProductId).CountAsync();
     var totalBids = await context.AuctionRecords.Where(e => e.AuctionId == Model.Id).CountAsync();
@@ -79,8 +79,9 @@
                     <div class="product-details-header">
                         <h3 class="title">@Model.Product.Name</h3>
                         <ul>
-                            <li>Listing ID: @Model.Id</li>
-                            <li>Item #: @Model.Product.Id</li>
+                            <li><h6><strong>Listing ID:</strong> @Model.Id</h6></li>
+                            <li><h6><strong>Item #:</strong> @Model.Product.Id</h6></li>
+                            <li><h6><strong>Price:</strong> @Model.Product.DefaultPrice.Value.ToString("C")</h6></li>
                         </ul>
                     </div>
                     <ul class="price-table mb-30">
@@ -109,22 +110,27 @@
                             }
                         </div>
                         <div class="buy-now-area">
-                            <a href="#0" class="custom-button">Buy Now: @Model.Product.DefaultPrice.Value.ToString("C")</a>
-                            <a href="~/Home/AddOrRemoveFavorites/@Model.Product.Id" id="like-detail-@(Model.Product.Id)" onclick="return jQueryAjaxFavorites('@Url.Action("AddOrRemoveFavorites", "Home", new { Model.Product.Id }, Context.Request.Scheme)');" class="rating custom-button active border">
+                            <form asp-action="AddToCart" asp-route-id="@Model.Product.Id" method="post" onsubmit="return addToCart('@Url.Action("AddToCart", "Home", new { Model.Product.Id }, Context.Request.Scheme)');">
+                                <button type="submit" class="btn btn-outline-primary font-weight-bolder" title="Add to your cart">Add To Cart <i class="fas fa-cart-plus"></i></button>
+                            </form>
+                            <form asp-action="BuyNow" asp-route-id="@Model.Product.Id" method="post">
+                                <button type="submit" class="btn btn-outline-success font-weight-bolder" title="Buy now with @Model.Product.DefaultPrice.Value.ToString("C")">Buy Now <i class="fas fa-hand-holding-usd"></i></button>
+                            </form>
+                            <a href="~/Home/AddOrRemoveFavorites/@Model.Product.Id" id="like-detail-@(Model.Product.Id)" title="Add to your favorites" onclick="return jQueryAjaxFavorites('@Url.Action("AddOrRemoveFavorites", "Home", new { Model.Product.Id }, Context.Request.Scheme)');" class="btn btn-outline-warning">
                                 @if (user != null)
                                 {
                                     @if (Tools.IsMyFavorites(context, user.Id, Model.Product.Id))
                                     {
-                                        <span><i class="fas fa-star"></i>&nbsp;You have liked this</span>
+                                        <span class="font-weight-bolder">You have liked this <i class="fas fa-star"></i></span>
                                     }
                                     else
                                     {
-                                        <span><i class="far fa-star"></i>&nbsp;Add to your favorites</span>
+                                        <span class="font-weight-bolder">Add to your favorites <i class="far fa-star"></i></span>
                                     }
                                 }
                                 else
                                 {
-                                    <span><i class="far fa-star"></i>&nbsp;Add to your favorites</span>
+                                    <span class="font-weight-bolder">Add to your favorites <i class="far fa-star"></i></span>
                                 }
                             </a>
                             <div class="share-area">
@@ -232,7 +238,7 @@
                         <div class="thumb">
                             <img src="~/assets/images/product/tab3.png" alt="product">
                         </div>
-                        <div class="content">Bid History (36)</div>
+                        <div class="content">Bid History (@totalBids)</div>
                     </a>
                 </li>
                 <li>
@@ -297,49 +303,7 @@
                 </div>
             </div>
             <div class="tab-pane fade show" id="history">
-                <div class="history-wrapper">
-                    <div class="item">
-                        <h5 class="title">Bid History</h5>
-                        <div class="history-table-area">
-                            <table class="history-table">
-                                <thead>
-                                    <tr>
-                                        <th>Bidder</th>
-                                        <th>date</th>
-                                        <th>time</th>
-                                        <th>unit price</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @{
-                                        var records = await context.AuctionRecords.Take(5).ToListAsync();
-                                        foreach (var item in records)
-                                        {
-                                            <tr>
-                                                <td data-history="bidder">
-                                                    <div class="user-info">
-                                                        <div class="thumb">
-                                                            <img src="~/assets/images/history/01.png" alt="history">
-                                                        </div>
-                                                        <div class="content">
-                                                            Moses Watts
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                                <td data-history="date">06/16/2021</td>
-                                                <td data-history="time">02:45:25 PM</td>
-                                                <td data-history="unit price">$900.00</td>
-                                            </tr>
-                                        }
-                                    }
-                                </tbody>
-                            </table>
-                            <div class="text-center mb-3 mt-4">
-                                <a href="#0" class="button-3">Load More</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                @await Html.PartialAsync("~/Views/PartialView/BidHistory.cshtml", Model.AuctionRecords)
             </div>
             @await Html.PartialAsync("~/Views/PartialView/DeliveryOptions.cshtml")
             @await Html.PartialAsync("~/Views/PartialView/Questions.cshtml")

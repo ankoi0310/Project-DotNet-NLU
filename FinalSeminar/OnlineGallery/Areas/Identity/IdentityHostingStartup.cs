@@ -30,6 +30,8 @@ namespace OnlineGallery.Areas.Identity
 
                 services.AddIdentity<ApplicationUser, IdentityRole>(options =>
                 {
+                    options.Password.RequireNonAlphanumeric = false;
+
                     options.User.RequireUniqueEmail = true;
                     options.SignIn.RequireConfirmedEmail = true;
                     options.SignIn.RequireConfirmedPhoneNumber = false;
@@ -48,21 +50,6 @@ namespace OnlineGallery.Areas.Identity
                         options.Conventions.AuthorizeAreaFolder("Identity", "/Account/Manage");
                         options.Conventions.AuthorizeAreaPage("Identity", "/Account/Logout");
                     });
-
-                //services.AddAuthorization(options =>
-                //{
-                //    options.FallbackPolicy = new AuthorizationPolicyBuilder()
-                //        .RequireAuthenticatedUser()
-                //        .Build();
-                //});
-
-                //services.AddControllers(config =>
-                //{
-                //    var policy = new AuthorizationPolicyBuilder()
-                //        .RequireAuthenticatedUser()
-                //        .Build();
-                //    config.Filters.Add(new AuthorizeFilter(policy));
-                //});
 
                 services.ConfigureApplicationCookie(options =>
                 {

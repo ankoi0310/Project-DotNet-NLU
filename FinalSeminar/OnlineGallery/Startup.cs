@@ -27,6 +27,7 @@ namespace OnlineGallery
             services.AddRazorPages();
             services.Configure<EmailSettings>(Configuration.GetSection("EmailSettings"));
             services.AddSingleton<IEmailSender, EmailSender>();
+            services.AddHttpContextAccessor();
             services.AddSession();
             services.AddMvc();
         }

@@ -59,7 +59,16 @@
                                             total += item.DefaultPrice.Value;
                                             <tr>
                                                 <td class="align-middle text-center">@count</td>
-                                                <td class="align-middle">@item.Name</td>
+                                                <td class="align-middle">
+                                                    @if (item.Status)
+                                                    {
+                                                        @item.Name
+                                                    }
+                                                    else
+                                                    {
+                                                        <s>@item.Name</s>
+                                                    }
+                                                </td>
                                                 <td class="align-middle text-right">@item.DefaultPrice.Value.ToString("C")</td>
                                                 <td>
                                                     <button onclick="return removeFromCart('@Url.Action("RemoveFromCart", "Home", new { item.Id }, Context.Request.Scheme)')" class="cart-remove text-danger">Remove</button>

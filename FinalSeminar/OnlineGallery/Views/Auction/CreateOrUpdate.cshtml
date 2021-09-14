@@ -1,8 +1,8 @@
 ﻿@using OnlineGallery.Data
 
-@model OnlineGallery.Models.Auction
-
 @inject ApplicationDbContext context
+
+@model Auction
 
 @{
     Layout = null;
@@ -29,12 +29,13 @@
             <input type="hidden" asp-for="Id" value="@Model.Id" />
             <input type="hidden" asp-for="Status" value="false" />
             <div class="row">
-                <div class="col-9">
+                <div class="col-8">
                     <div class="form-group">
                         <label asp-for="ProductId" class="control-label"></label>
-                        @if (Model.Product != null)
+                        @if (Model.ProductId != null)
                         {
-                            <input type="text" class="form-control" value="@Model.Product.Name" disabled />
+                            var product = context.Products.Find(Model.ProductId);
+                            <input type="text" class="form-control" value="@product.Name" disabled />
                             <input type="hidden" asp-for="ProductId" />
                         }
                         else
@@ -49,7 +50,21 @@
                         }
                     </div>
                 </div>
-                <div class="col-3">
+                <div class="col-2">
+                    <div class="form-group">
+                        <label asp-for="StartingPrice" class="control-label"></label>
+                        <input asp-for="StartingPrice" class="form-control" />
+                    </div>
+                </div>
+                <div class="col-2">
+                    <div class="form-group">
+                        <label asp-for="StepPrice" class="control-label"></label>
+                        <input asp-for="StepPrice" class="form-control" />
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-4">
                     <div class="form-group">
                         <label asp-for="StartDay" class="control-label"></label>
                         @if (Model.StartDay.HasValue)
@@ -62,8 +77,6 @@
                         }
                     </div>
                 </div>
-            </div>
-            <div class="row">
                 <div class="col-4">
                     <div class="form-group">
                         <label asp-for="ClosingDay" class="control-label"></label>
@@ -75,20 +88,6 @@
                         {
                             <input asp-for="ClosingDay" type="date" class="form-control" value="@DateTime.Now.AddDays(2).ToString("yyyy-MM-dd")" />
                         }
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-2">
-                    <div class="form-group">
-                        <label asp-for="StartingPrice" class="control-label"></label>
-                        <input asp-for="StartingPrice" type="text" class="form-control" />
-                    </div>
-                </div>
-                <div class="col-4">
-                    <div class="form-group">
-                        <label asp-for="StepPrice" class="control-label"></label>
-                        <input asp-for="StepPrice" type="text" class="form-control" />
                     </div>
                 </div>
             </div>

@@ -59,13 +59,20 @@
                                         @item.Day.Value.ToString("dd/MM/yyyy HH:mm:ss")
                                     </td>
                                     <td class="align-middle font-weight-bolder text-center">
-                                        @if (Tools.IsSold(context, item.Auction.ProductId.Value))
+                                        @if (Tools.IsSoldBeforeAuctionEnd(context, item.Auction.ProductId.Value))
                                         {
-                                            <span class="text-success">Successfully</span>
+                                            <span class="text-danger">Sold</span>
                                         }
                                         else if (Tools.IsWinner(context, item))
                                         {
-                                            <span class="text-danger">Winner</span>
+                                            if (Tools.IsSold(context, item.Auction.ProductId.Value))
+                                            {
+                                                <span class="text-danger">Winner - Sold</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-warning">Winner - Pending</span>
+                                            }
                                         }
                                         else
                                         {
