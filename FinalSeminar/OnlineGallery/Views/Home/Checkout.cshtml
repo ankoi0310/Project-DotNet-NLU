@@ -42,7 +42,7 @@
             <div class="text-center pt-30 pb-20">
                 <h2 class="title">INVOICE</h2>
             </div>
-            <form asp-action="ConfirmPayment" asp-route-id="@ViewBag.Id" method="POST" onsubmit="return confirmPurchase();">
+            <form id="form" asp-action="ConfirmPayment" asp-route-id="@ViewBag.Id" method="POST" onsubmit="return confirmPurchase();">
                 <div class="row">
                     <div class="col-9 pr-0 text-right">
                         <span class="font-weight-bolder">Invoice No</span>
@@ -156,6 +156,68 @@
                                     <h3 class="border-bottom">Payment method</h3>
                                 </div>
                             </div>
+                            <div class="row">
+                                <div class="col">
+                                    <div id="smart-button-container">
+                                        <div style="text-align: center; margin-top: 0.625rem;" id="paypal-button-container"></div>
+                                    </div>
+                                    <script src="https://www.paypal.com/sdk/js?client-id=AQVkbrvV36q8ISQ2RteBsEzwY3w-xtomu60brAZ8uVqSS6IUouNVHqLUigCYksdKjEiMYtnLte74i0F0&enable-funding=venmo&currency=USD" data-sdk-integration-source="button-factory"></script>
+                                    <script>
+                                        function initPayPalButton() {
+
+                                            var purchase_units = [];
+                                            purchase_units[0] = {};
+                                            purchase_units[0].amount = {};
+
+                                            paypal.Buttons({
+                                                style: {
+                                                    color: 'gold',
+                                                    shape: 'rect',
+                                                    label: 'paypal',
+                                                    layout: 'vertical',
+
+                                                },
+
+                                                onInit: function (data, actions) {
+                                                    actions.enable();
+                                                },
+
+                                                onClick: function () {
+                                                    purchase_units[0].description = "TRANSACTION @(ViewBag.Id == 0 ? last.Id + 1 : ViewBag.Id)";
+                                                    purchase_units[0].amount.value = 1;
+                                                },
+
+                                                createOrder: function (data, actions) {
+                                                    return actions.order.create({
+                                                        purchase_units: purchase_units,
+                                                    });
+                                                },
+
+                                                onApprove: function (data, actions) {
+                                                    return actions.order.capture().then(function (orderData) {
+
+                                                        // Full available details
+                                                        console.log('Capture result', orderData, JSON.stringify(orderData, null, 2));
+
+                                                        // Show a success message within this page, e.g.
+                                                        //const element = document.getElementById('paypal-button-container');
+                                                        //element.innerHTML = '';
+                                                        //element.innerHTML = '<h3>Thank you for your payment!</h3>';
+
+                                                        // Or go to another URL:  actions.redirect('thank_you.html');
+                                                        document.getElementById('form').submit();
+                                                    });
+                                                },
+
+                                                onError: function (err) {
+                                                    console.log(err);
+                                                }
+                                            }).render('#paypal-button-container');
+                                        }
+                                        initPayPalButton();
+                                    </script>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -177,7 +239,7 @@
 <!--============= Contact Section Ends Here =============-->
 <script>
     confirmPurchase = () => {
-        if (confirm('Do you agree to buy these products?')) {
+        if (confirm('Confirm payment?')) {
             return true;
         }
         return false;

@@ -123,7 +123,10 @@ namespace OnlineGallery.Models
         // OVERVIEW PER MONTH
         // Get registration amount
         public static int GetTotalRegistration(ApplicationDbContext context)
-            => context.UserRoles.Where(e => e.RoleId.Equals("2")).Count();
+        {
+            var userIds = context.Users.Where(e => e.EmailConfirmed).Select(e => e.Id);
+            return context.UserRoles.Where(e => e.RoleId.Equals("2") && userIds.Contains(e.UserId)).Count();
+        }
 
         // Get this month sales
         public static decimal GetThisMonthSales(ApplicationDbContext context)

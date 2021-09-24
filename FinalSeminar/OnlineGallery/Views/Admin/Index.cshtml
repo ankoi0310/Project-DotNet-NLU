@@ -14,7 +14,7 @@
     var products = context.TransactionDetails.Where(e => e.Transaction.Status).Count();
 
     // Total Profit
-    var profits = context.TransactionDetails.Select(e => e.Price).Sum();
+    var profits = context.TransactionDetails.Where(e => e.Transaction.Status).Select(e => e.Price).Sum();
 
     // Total Products In Cart
     var productsInCart = context.Carts.Count();

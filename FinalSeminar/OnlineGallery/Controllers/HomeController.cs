@@ -448,13 +448,16 @@ namespace OnlineGallery.Controllers
         public void CheckAuctionExpired(ApplicationDbContext context)
         {
             var auctionList = context.Auctions.ToList();
+            var auctionRecords = context.AuctionRecords.Select(e => e.AuctionId).Distinct().ToList();
             foreach (var item in auctionList)
             {
                 var product = context.Products.Find(item.ProductId);
                 // Check product has been sold before auction end
-                if (!product.Status && item.StartDay.Value.CompareTo(DateTime.Now) > 0)
+                if (!product.Status && item.Status)
                 {
-                    context.Remove(item);
+                    item.ClosingDay = DateTime.Now;
+                    item.Status = false;
+                    context.Update(item);
                     context.SaveChanges();
                 }
                 else if (product.Status)
@@ -473,20 +476,23 @@ namespace OnlineGallery.Controllers
                         context.Update(item);
                         context.SaveChanges();
 
-                        // Check if not have transaction (bought yet)
-                        if (context.TransactionDetails.Any(e => !e.ProductId.Equals(item.ProductId.Value)))
+                        if (auctionRecords.Contains(item.Id))
                         {
-                            var userId = context.AuctionRecords.Where(e => e.AuctionId.Equals(item.Id)).Select(e => e.UserId).FirstOrDefault();
-                            // Create new transaction
-                            Transaction transaction = new() { UserId = userId, Auctioned = true, CreateDate = DateTime.Now, TotalPrice = product.DefaultPrice.Value };
-                            context.Add(transaction);
-                            context.SaveChanges();
+                            // Check if not have transaction (bought yet)
+                            if (context.TransactionDetails.Any(e => !e.ProductId.Equals(item.ProductId.Value)))
+                            {
+                                var userId = context.AuctionRecords.Where(e => e.AuctionId.Equals(item.Id)).Select(e => e.UserId).FirstOrDefault();
+                                // Create new transaction
+                                Transaction transaction = new() { UserId = userId, Auctioned = true, CreateDate = DateTime.Now, TotalPrice = product.DefaultPrice.Value };
+                                context.Add(transaction);
+                                context.SaveChanges();
 
-                            // Create detail
-                            int latestId = context.Transactions.OrderBy(e => e.Id).Select(e => e.Id).Last(); // Above transaction id
-                            TransactionDetail detail = new() { TransactionId = latestId, ProductId = product.Id, Price = product.DefaultPrice.Value };
-                            context.Add(detail);
-                            context.SaveChanges();
+                                // Create detail
+                                int latestId = context.Transactions.OrderBy(e => e.Id).Select(e => e.Id).Last(); // Above transaction id
+                                TransactionDetail detail = new() { TransactionId = latestId, ProductId = product.Id, Price = product.DefaultPrice.Value };
+                                context.Add(detail);
+                                context.SaveChanges();
+                            }
                         }
                     }
                 }
